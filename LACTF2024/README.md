@@ -54,7 +54,7 @@ We found the exact rock in the picture. Clicking on the bottom left corner of th
 
 ![image](https://github.com/fyrepaw13/fyrepaw13.github.io/assets/62428064/50152667-d4ed-44e9-81a1-a39c85146872)
 
-```python
+```shell
 strings shattered-memories      
 What was the flag again?
 No, I definitely remember it being a different length...
@@ -72,8 +72,9 @@ Just run strings on it and reassemble the flag.
 
 ![image](https://github.com/fyrepaw13/fyrepaw13.github.io/assets/62428064/a7153847-f008-4075-a2ec-ce09869d8dd5)
 
-### Decompiled Code
-{% highlight c %}
+<details>
+<summary>Decompiled Code</summary>
+```c
     do {
       iVar1 = strncmp(pcVar3,"pretty",6);
       NumOfPretty = NumOfPretty + (uint)(iVar1 == 0);
@@ -92,7 +93,8 @@ Just run strings on it and reassemble the flag.
         system("cat flag.txt");
         return 0;
       }
-{% endhighlight %}
+```
+</details>
 
 The program will print out the flag if we say "pretty" 15 times, "please" 39 times and "flag".
 
