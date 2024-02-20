@@ -95,8 +95,9 @@ if (NumOfPlease != 0) {
         return 0;
     }
 }
-</details>
 ```
+</details>
+
 
 The program will print out the flag if we say "pretty" 15 times, "please" 39 times and "flag".
 
