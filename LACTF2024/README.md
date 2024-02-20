@@ -74,9 +74,8 @@ Just run strings on it and reassemble the flag.
 
 <details>
 <summary>Decompiled Code</summary>
-
 	```c
- 		    do {
+		    do {
 	      iVar1 = strncmp(pcVar3,"pretty",6);
 	      NumOfPretty = NumOfPretty + (uint)(iVar1 == 0);
 	      iVar1 = strncmp(pcVar3,"please",6);
@@ -94,7 +93,7 @@ Just run strings on it and reassemble the flag.
 	        system("cat flag.txt");
 	        return 0;
 	      }
- 	```
+	```
 </details>
 
 The program will print out the flag if we say "pretty" 15 times, "please" 39 times and "flag".
