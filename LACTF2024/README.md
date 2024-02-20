@@ -75,27 +75,28 @@ Just run strings on it and reassemble the flag.
 <details>
 <summary>Decompiled Code</summary>
 
-	```c
- 	    do {
-	      iVar1 = strncmp(pcVar3,"pretty",6);
-	      NumOfPretty = NumOfPretty + (uint)(iVar1 == 0);
-	      iVar1 = strncmp(pcVar3,"please",6);
-	      NumOfPlease = NumOfPlease + (uint)(iVar1 == 0);
-	      pcVar3 = pcVar3 + 1;
-	    } while (pcVar3 != acStack_237 + ((int)sVar2 - 6));
-	    if (NumOfPlease != 0) {
-	      pcVar3 = strstr(&local_238,"flag");
-	      if (pcVar3 == (char *)0x0) {
-	        puts("sorry, i didn\'t understand what you mean");
-	        return 0;
-	      }
-	      if ((NumOfPretty + NumOfPlease == 0x36) && (NumOfPretty - NumOfPlease == -0x18)) {
-	        puts("ok here\'s your flag");
-	        system("cat flag.txt");
-	        return 0;
-	      }
- 	```
+```c
+do {
+    iVar1 = strncmp(pcVar3, "pretty", 6);
+    NumOfPretty = NumOfPretty + (uint)(iVar1 == 0);
+    iVar1 = strncmp(pcVar3, "please", 6);
+    NumOfPlease = NumOfPlease + (uint)(iVar1 == 0);
+    pcVar3 = pcVar3 + 1;
+} while (pcVar3 != acStack_237 + ((int)sVar2 - 6));
+if (NumOfPlease != 0) {
+    pcVar3 = strstr(&local_238, "flag");
+    if (pcVar3 == (char *)0x0) {
+        puts("sorry, i didn\'t understand what you mean");
+        return 0;
+    }
+    if ((NumOfPretty + NumOfPlease == 0x36) && (NumOfPretty - NumOfPlease == -0x18)) {
+        puts("ok here\'s your flag");
+        system("cat flag.txt");
+        return 0;
+    }
+}
 </details>
+```
 
 The program will print out the flag if we say "pretty" 15 times, "please" 39 times and "flag".
 
