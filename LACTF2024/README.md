@@ -119,7 +119,7 @@ Looks like its a choice-driven game when running the program. Decompile the jar 
 
 From the decompiled code, the game moves from state to state depending on the choices we make.
 
-{% highlight java %}
+```java
  case 5:
          try {
             Socket var0 = new Socket("chall.lac.tf", 31151);
@@ -144,18 +144,18 @@ From the decompiled code, the game moves from state to state depending on the ch
          button1.setText("Leave");
          button2.setText("Leave");
          break;
-{% endhighlight %}
+```
 
 State 5 prints out the flag so this should be our end goal.
 
-{% highlight java %}
+```java
       case 3:
          if (!hasGlove) {
             System.exit(0);
          } else {
             state = 5;
          }
-{% endhighlight %}
+```
 
 For us to reach state 5, we will need to be in state 3 and hasGlove must be true. 
 
@@ -163,7 +163,7 @@ For us to reach state 5, we will need to be in state 3 and hasGlove must be true
 
 I wrote down all the conditions on a piece of paper to visualize it
 
-{% highlight java %}
+```java
 case 4:
          if (var0 == 0) {
             exploit = exploit + "d";
@@ -189,13 +189,14 @@ case 4:
          }
 
          return;
-{% endhighlight %}
+```
 
 We need to go to state 6 to set hasGlove to True and to do that, we need to first bypass state 4 which hashes the string variable when its length is 8 and compares it to a hardcoded hash. We need to figure out the sequence of exploit to pass this check. Luckily, the length of the string is only 8 so there are only 256 possible permutations of "dddddddd" to "pppppppp". I made ChatGPT create a java program to bruteforce it.
 
-### Hash Crack Script
+<details>
+<summary>Hash Crack Script</summary>
 
-{% highlight java %}
+```java
 package backup;
 import java.security.MessageDigest;
 import java.util.Arrays;
@@ -234,7 +235,9 @@ public class omg {
         generateCombinations(length);
     }
 }
-{% endhighlight %}
+```
+</details>
+
 
 The matching combination was "dpddpdpp". With that, we have everything we need
 
