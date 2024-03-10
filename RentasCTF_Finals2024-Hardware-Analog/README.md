@@ -1,4 +1,4 @@
-For this challenge, we were given a Simduino board connected to a joystick module and LCD display.
+For this challenge, we were given a board connected to a joystick module and LCD display.
 
 ![image](https://github.com/fyrepaw13/ctf_writeups/assets/62428064/9307cd28-311b-47a8-89b5-b0f1403f4899)
 
