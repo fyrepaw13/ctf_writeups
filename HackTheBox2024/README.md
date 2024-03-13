@@ -261,21 +261,9 @@ We are given a Microsoft Word 2007+ document. I will use [oletools](https://gith
 ```bash
 ┌──(kali㉿kali)-[~/HTB2024/foren/invitation]
 └─$ olevba --decode invitation.docm                       
-XLMMacroDeobfuscator: pywin32 is not installed (only is required if you want to use MS Excel)
-olevba 0.60.1 on Python 3.11.6 - http://decalage.info/python/oletools
-===============================================================================
-FILE: invitation.docm
-Type: OpenXML
-WARNING  For now, VBA stomping cannot be detected for files in memory
--------------------------------------------------------------------------------
-VBA MACRO ThisDocument.cls 
-in file: word/vbaProject.bin - OLE stream: 'VBA/ThisDocument'
-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
-(empty macro)
--------------------------------------------------------------------------------
-VBA MACRO NewMacros.bas 
-in file: word/vbaProject.bin - OLE stream: 'VBA/NewMacros'
-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
+```
+
+```
 Public IAiiymixt As String
 Public kWXlyKwVj As String
 
@@ -363,37 +351,4 @@ Close #K764B5Ph46Vh
 ActiveDocument.Save
 End If
 End Sub
-
-+----------+--------------------+---------------------------------------------+
-|Type      |Keyword             |Description                                  |
-+----------+--------------------+---------------------------------------------+
-|AutoExec  |AutoOpen            |Runs when the Word document is opened        |
-|AutoExec  |AutoClose           |Runs when the Word document is closed        |
-|Suspicious|Environ             |May read system environment variables        |
-|Suspicious|Open                |May open a file                              |
-|Suspicious|Put                 |May write to a file (if combined with Open)  |
-|Suspicious|Binary              |May read or write a binary file (if combined |
-|          |                    |with Open)                                   |
-|Suspicious|Kill                |May delete a file                            |
-|Suspicious|Shell               |May run an executable file or a system       |
-|          |                    |command                                      |
-|Suspicious|WScript.Shell       |May run an executable file or a system       |
-|          |                    |command                                      |
-|Suspicious|Run                 |May run an executable file or a system       |
-|          |                    |command                                      |
-|Suspicious|CreateObject        |May create an OLE object                     |
-|Suspicious|Windows             |May enumerate application windows (if        |
-|          |                    |combined with Shell.Application object)      |
-|Suspicious|Xor                 |May attempt to obfuscate specific strings    |
-|          |                    |(use option --deobf to deobfuscate)          |
-|Suspicious|Base64 Strings      |Base64-encoded strings were detected, may be |
-|          |                    |used to obfuscate strings (option --decode to|
-|          |                    |see all)                                     |
-|IOC       |mailform.js         |Executable file name                         |
-|Base64    |'g\x03Zǚ\x08{hI\x|sWcDWp36x5oIe2hJGnRy1iC92AcdQgO8RLioVZWlhCKJX|
-|String    |1atr \x07\x1dB\x0|HRSqO450AiqLZyLFeXYilCtorg0p3RdaoPa          |
-|          |3DU"\\tR9\|                                             |
-|          |x08-               |                                             |
-|          |\x15؊P4t]j'|                                             |
-+----------+--------------------+---------------------------------------------+
 ```
