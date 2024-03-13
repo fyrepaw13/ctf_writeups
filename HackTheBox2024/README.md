@@ -8,3 +8,5 @@
 - [pwn/rocket_blaster_xxx](#pwnrocket-blaster-xxx)
 - [pwn/pet_companion](#pwnpet-companion)
 - [pwn/sound_of_silence](#pwnsound-of-silence)
+
+## Forensics/Fake Boost
