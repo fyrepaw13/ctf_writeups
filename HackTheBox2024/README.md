@@ -514,3 +514,13 @@ Another extremely long code. Luckily my teammate @penguin_cat saw that the flag 
 Base64 decode it and you will get the flag
 
 > Flag : HTB{m4ld0cs_4r3_g3tt1ng_Tr1cki13r}
+
+## Pwn/Writing on the wall
+
+## Pwn/Delulu
+
+## Pwn/Rocket Blaster XXX
+
+## Pwn/Pet Companion
+
+## Pwn/Sound of Silence
