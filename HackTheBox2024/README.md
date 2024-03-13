@@ -10,3 +10,7 @@
 - [pwn/sound_of_silence](#pwnsound-of-silence)
 
 ## Forensics/Fake Boost
+
+We are given a .pcapng file so we will open it in Wireshark. The first thing I like to do when opening pcap files is to go to Statistics > Protocol Hiearchy
+
+![image](https://github.com/fyrepaw13/ctf_writeups/assets/62428064/b39e4bf3-d291-49ad-8673-c56ba9763ce4)
