@@ -263,7 +263,7 @@ We are given a Microsoft Word 2007+ document. I will use [oletools](https://gith
 └─$ olevba --decode invitation.docm                       
 ```
 
-```
+```vba
 Public IAiiymixt As String
 Public kWXlyKwVj As String
 
