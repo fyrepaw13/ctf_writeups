@@ -580,9 +580,9 @@ p.sendlineafter(">> ", b"\x00" * 7)
 p.interactive()   
 ```
 
-> Flag : HTB{3v3ryth1ng_15_r34d4bl3}
-
 </details>
+
+> Flag : HTB{3v3ryth1ng_15_r34d4bl3}
 
 ## Pwn/Delulu
 
@@ -648,6 +648,138 @@ This will be our final payload. The reason 1 is reduced from 48879 is because th
 
 ## Pwn/Rocket Blaster XXX
 
+<details>
+<summary>Decompiled Code</summary>
+
+```c
+undefined8 main(void)
+
+{
+  undefined8 local_28;
+  undefined8 local_20;
+  undefined8 local_18;
+  undefined8 local_10;
+  
+  banner();
+  local_28 = 0;
+  local_20 = 0;
+  local_18 = 0;
+  local_10 = 0;
+  fflush(stdout);
+  printf(
+        "\nPrepare for trouble and make it double, or triple..\n\nYou need to place the ammo in the  right place to load the Rocket Blaster XXX!\n\n>> "
+        );
+  fflush(stdout);
+  read(0,&local_28,0x66);
+  puts("\nPreparing beta testing..");
+  return 0;
+}
+
+void fill_ammo(long param_1,long param_2,long param_3)
+
+{
+  ssize_t sVar1;
+  char local_d;
+  int local_c;
+  
+  local_c = open("./flag.txt",0);
+  if (local_c < 0) {
+    perror("\nError opening flag.txt, please contact an Administrator.\n");
+                    /* WARNING: Subroutine does not return */
+    exit(1);
+  }
+  if (param_1 != 0xdeadbeef) {
+    printf("%s[x] [-] [-]\n\n%sPlacement 1: %sInvalid!\n\nAborting..\n",&DAT_00402010,&DAT_00402008,
+           &DAT_00402010);
+                    /* WARNING: Subroutine does not return */
+    exit(1);
+  }
+  if (param_2 != 0xdeadbabe) {
+    printf(&DAT_004020c0,&DAT_004020b6,&DAT_00402010,&DAT_00402008,&DAT_00402010);
+                    /* WARNING: Subroutine does not return */
+    exit(2);
+  }
+  if (param_3 != 0xdead1337) {
+    printf(&DAT_00402100,&DAT_004020b6,&DAT_00402010,&DAT_00402008,&DAT_00402010);
+                    /* WARNING: Subroutine does not return */
+    exit(3);
+  }
+  printf(&DAT_00402140,&DAT_004020b6);
+  fflush(stdin);
+  fflush(stdout);
+  while( true ) {
+    sVar1 = read(local_c,&local_d,1);
+    if (sVar1 < 1) break;
+    fputc((int)local_d,stdout);
+  }
+  close(local_c);
+  fflush(stdin);
+  fflush(stdout);
+  return;
+}
+```
+
+</details>
+
+Looking at the decompiled code, looks like we have a BOF and we need to call fill_ammo() to get the flag. However, we need to set up the registers according to the values defined in fill_ammo() to be able to get the flag. 
+
+```
+ROPgadget --binary ./rocket_blaster_xxx | grep "pop rdi" 
+ROPgadget --binary ./rocket_blaster_xxx | grep "pop rsi" 
+ROPgadget --binary ./rocket_blaster_xxx | grep "pop rdx" 
+```
+
+Conveniently, there are plenty of ROP gadgets
+
+<details>
+<summary>Solve Script</summary>
+
+```python
+
+```
+
+</details>
+
 ## Pwn/Pet Companion
 
+<details>
+<summary>Decompiled Code</summary>
+
+```c
+
+```
+
+</details>
+
+
+
+<details>
+<summary>Solve Script</summary>
+
+```python
+
+```
+
+</details>
+
 ## Pwn/Sound of Silence
+
+<details>
+<summary>Decompiled Code</summary>
+
+```c
+
+```
+
+</details>
+
+
+
+<details>
+<summary>Solve Script</summary>
+
+```python
+
+```
+
+</details>
