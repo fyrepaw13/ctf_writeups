@@ -121,7 +121,7 @@ void hear_taunt(void)
 
 oh wait . we got a function that does `execve("/bin/sh",...)` .. woah , let's see if it works
 
-![gif_getting_local_shell](assets/gif_getting_local_shell.gif)
+![gif_getting_local_shell](https://github.com/S4muii/ctf_writeups/blob/main/wolvctf24/game_cet/assets/gif_getting_local_shell.gif)
 
 well, That was unexpected, as you can see it does work . easiest challenge ever . let's goooooo.
 
@@ -281,5 +281,3 @@ p.interactive()
 
 # wctf{y0u_c4nt_b3_s3r1ous_appr0ved_g4dg3t5_0nly}
 ```
-
-![congratz](./assets/congratz.gif)
