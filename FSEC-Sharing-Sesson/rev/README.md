@@ -1,1 +1,1 @@
-Note : Some of these challenges are not made by me
+Note : These challenges are not made by me
