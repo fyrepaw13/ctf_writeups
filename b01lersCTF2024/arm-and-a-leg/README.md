@@ -47,6 +47,14 @@ Now, we will connect to our remote debugging session at port 1234
 
 ## Initial Analysis
 
+```
+└─$ checksec --file=chal         
+RELRO           STACK CANARY      NX            PIE             RPATH      RUNPATH      Symbols         FORTIFY Fortified       Fortifiable     FILE
+Partial RELRO   Canary found      NX enabled    No PIE          No RPATH   No RUNPATH   108 Symbols       No    0               2               chal
+```
+
+Stack Canary and NX has been enabled
+
 <details>
 <summary>get_address()</summary>
   
@@ -98,3 +106,12 @@ void feedback(void)
 ```
 
 </details>
+
+From the results of the decompilation, it is clear that we need to leak the stack canary using the format string vulnerability and overflow the feedback function into a ret2libc 
+
+## Exploitation
+
+So after entering the %p format, we found out that we can get a canary leak at %19$p and a libc leak at %21$p
+
+![image](https://github.com/fyrepaw13/ctf_writeups/assets/62428064/a1aca2b8-af69-439a-bd8d-1c3371a8dd02)
+
