@@ -119,4 +119,9 @@ Using gdb to inspect the memory
 
 ![image](https://github.com/fyrepaw13/ctf_writeups/assets/62428064/97707e63-a6c0-41cf-8cee-c3be236d0d34)
 
-We found that the leak is located inside __libc_start_main at offset 152
+We found that the leak is located inside __libc_start_main at offset 152. We can easily calculate the libc address using
+
+```py
+libc_start_main = libc_start_main_leak - 152
+libc.address = libc_start_main - libc.symbols['__libc_start_main']
+```
