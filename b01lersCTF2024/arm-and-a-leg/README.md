@@ -27,3 +27,19 @@ docker run -v "`pwd`:/chal" -it <HASH> bash
 ```
 
 Replace <HASH> with the hash value from the Dockerfile and it should set you up in the environment and mount files in your current directory into the /chal folder. Next, go into the chal folder and run `ldd ./chal` to look for the libc. After locating it, now you must run `cp /lib/x86_64-linux-gnu/<YOUR_LIBC> .` and copy the libc to the current directory. Use the command `exit` to leave the docker instance
+
+### Debugging
+
+```
+qemu-aarch64-static -g 1234 ./chal
+```
+
+Run this command and pass in the -g flag which enables debugging mode
+
+```
+$gdb-multiarch
+file chal
+target remote :1234
+```
+
+Now, we will connect to our remote debugging session at port 1234
