@@ -115,3 +115,8 @@ So after entering the %p format, we found out that we can get a canary leak at %
 
 ![image](https://github.com/fyrepaw13/ctf_writeups/assets/62428064/a1aca2b8-af69-439a-bd8d-1c3371a8dd02)
 
+Using gdb to inspect the memory
+
+![image](https://github.com/fyrepaw13/ctf_writeups/assets/62428064/97707e63-a6c0-41cf-8cee-c3be236d0d34)
+
+We found that the leak is located inside __libc_start_main at offset 152
