@@ -43,3 +43,60 @@ target remote :1234
 ```
 
 Now, we will connect to our remote debugging session at port 1234
+
+
+## Initial Analysis
+
+<details>
+<summary>Output</summary>
+  
+```c
+undefined8 main(void)
+
+{
+  int iVar1;
+  int local_c;
+  long local_8;
+  
+  local_8 = ___stack_chk_guard;
+  setup(&__stack_chk_guard,0);
+  iVar1 = puts(
+              "Hello! \nWelcome to ARMs and Legs, here for all of your literal and metaphorical need s!"
+              );
+  print_menu(iVar1);
+  __isoc99_scanf(&DAT_00400d08,&local_c);
+  if (local_c == 1) {
+    iVar1 = puts(
+                "So, you\'d like to purchase an ARM...are you worthy enough to purchase such an appe ndage?"
+                );
+    iVar1 = worthyness_tester(iVar1);
+    if (iVar1 == 0) {
+      get_address();
+      feedback();
+    }
+    else {
+      puts("Close, but no cigar. Maybe try a Leg?");
+    }
+  }
+  else if (local_c == 2) {
+    iVar1 = puts(
+                "So, you\'d like to purchase a Leg...are you worthy enough to purchase such an appen dage?!"
+                );
+    iVar1 = worthyness_tester(iVar1);
+    if (iVar1 == 0) {
+      get_address();
+      feedback();
+    }
+    else {
+      puts("Close, but no cigar. Maybe try an ARM?");
+    }
+  }
+  if (local_8 - ___stack_chk_guard == 0) {
+    return 0;
+  }
+                    /* WARNING: Subroutine does not return */
+  __stack_chk_fail(&__stack_chk_guard,0,0,local_8 - ___stack_chk_guard);
+}
+```
+
+</details>
