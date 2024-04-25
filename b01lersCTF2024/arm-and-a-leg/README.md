@@ -4,6 +4,8 @@ This was the first time I faced a challenge that was using aarch64 architecture.
 
 To be able solve this challenge, we first must set up the environment for the challenge.
 
+## Setup
+
 For debugging, we can use 
 
 ```
