@@ -135,8 +135,10 @@ Before we go into the ROP, we need to first understand the registers in aarch64.
 ### Registers
 
 x0 to x7 are used to pass arguments, similar to rdi, rsi and rdx
+
 x29 is similar to rbp
-x30 is stores the return address
+
+x30 stores the return address
 
 ### Function Prologue, Epilogue and Stack Layout
 
