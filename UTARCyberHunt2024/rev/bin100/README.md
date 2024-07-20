@@ -140,94 +140,49 @@ Then, heres the main file
 ```java
 import java.util.Arrays;
 
-public class CustomRandom {
-    private static final int MBIG = 2147483647;
-    private static final int MSEED = 161803398;
-    private static final int MZ = 0;
+public class Main {
+    // Define the secret array as a static field
+    private static final byte[] SECRET = new byte[]{
+            95, 80, 67, 92, 100, 32, 58, 56, 116, 40,
+            103, 57, 37, 52, 47, 64, 127, 45, 35, 48,
+            42, 99, 120, 71, 52, 104, 101, 99, 44, 118,
+            108, 36, 71, 49, 19, 96, 120, 110
+    };
 
-    private int inext;
-    private int inextp;
-    private int[] seedArray = new int[56];
+    public static void main(String[] args) {
+        // Initialize the custom random class with seed 123456
+        CustomRandom random = new CustomRandom(123456);
 
-    public CustomRandom(int seed) {
-        int num = (seed == Integer.MIN_VALUE) ? Integer.MAX_VALUE : Math.abs(seed);
-        int num2 = MSEED - num;
-        this.seedArray[55] = num2;
-        int num3 = 1;
+        // Define the SECRET array
+        byte[] SECRET = {
+                95, 80, 67, 92, 100, 32, 58, 56, 116, 40,
+                103, 57, 37, 52, 47, 64, 127, 45, 35, 48,
+                42, 99, 120, 71, 52, 104, 101, 99, 44, 118,
+                108, 36, 71, 49, 19, 96, 120, 110
+        };
 
-        for (int i = 1; i < 55; i++) {
-            int num4 = 21 * i % 55;
-            this.seedArray[num4] = num3;
-            num3 = num2 - num3;
-            if (num3 < 0) {
-                num3 += MBIG;
-            }
-            num2 = this.seedArray[num4];
+        // Create a key array of size 38
+        int[] key = new int[38];
+
+        // Populate the key array with random values between 1 and 37 (inclusive)
+        for (int i = 0; i < key.length; i++) {
+            key[i] = random.next(1, 38);
         }
 
-        for (int j = 1; j < 5; j++) {
-            for (int k = 1; k < 56; k++) {
-                this.seedArray[k] -= this.seedArray[1 + (k + 30) % 55];
-                if (this.seedArray[k] < 0) {
-                    this.seedArray[k] += MBIG;
-                }
-            }
+        // Initialize a StringBuilder to accumulate characters
+        StringBuilder result = new StringBuilder();
+
+        // XOR each element of the SECRET array with corresponding element of the key array
+        // Process up to the length of the SECRET array
+        for (int i = 0; i < SECRET.length; i++) {
+            // Ensure to wrap around if key array is longer than SECRET array
+            int keyIndex = i % key.length;
+            char x = (char) (SECRET[i] ^ key[keyIndex]);
+            result.append(x);
         }
 
-        this.inext = 0;
-        this.inextp = 21;
-    }
-
-    private int internalSample() {
-        int num = this.inext;
-        int num2 = this.inextp;
-        if (++num >= 56) {
-            num = 1;
-        }
-        if (++num2 >= 56) {
-            num2 = 1;
-        }
-        int num3 = this.seedArray[num] - this.seedArray[num2];
-        if (num3 == MBIG) {
-            num3--;
-        }
-        if (num3 < 0) {
-            num3 += MBIG;
-        }
-        this.seedArray[num] = num3;
-        this.inext = num;
-        this.inextp = num2;
-        return num3;
-    }
-
-    public int next() {
-        return this.internalSample();
-    }
-
-    public int next(int minValue, int maxValue) {
-        if (minValue > maxValue) {
-            throw new IllegalArgumentException("minValue cannot be greater than maxValue.");
-        }
-
-        long range = (long)maxValue - minValue;
-        if (range <= Integer.MAX_VALUE) {
-            return (int) (this.internalSample() / (double) MBIG * range) + minValue;
-        }
-
-        throw new IllegalArgumentException("Range is too large.");
-    }
-
-    public double nextDouble() {
-        return this.internalSample() / (double) MBIG;
-    }
-
-    public void nextBytes(byte[] buffer) {
-        if (buffer == null) {
-            throw new IllegalArgumentException("buffer cannot be null");
-        }
-        for (int i = 0; i < buffer.length; i++) {
-            buffer[i] = (byte) (this.internalSample() % 256);
-        }
+        // Print the resulting string
+        System.out.println("Decrypted String: " + result.toString());
     }
 }
 ```
