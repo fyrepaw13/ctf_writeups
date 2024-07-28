@@ -8,7 +8,7 @@ All of the security protections have been turned off (except ASLR of course).
 
 ![image](https://github.com/user-attachments/assets/630985d6-ce73-4b4a-b719-ad06f6062481)
 
-When running the binary, we can see that it leaks out the address of our buffer, which is located in the stack memory region. The challenge is screaming ret2shellcode since we are given the address of the buffer and NX (No eXecute) protection is turned off. The basic idea is to inject shellcode into the buffer and overwrite the saved return address to point to our shellcode.
+When running the binary, we can see that it leaks out the address of our buffer, which is located in the stack memory region. The challenge is screaming ret2shellcode since we are given the address of the buffer and NX (No eXecute) protection is turned off. NX is a protection which prevents execution of shellcode in the stack. So, the basic idea is to inject shellcode into the buffer and overwrite the saved return address to point to our shellcode.
 
 ![image](https://github.com/user-attachments/assets/b1ceda87-4725-4f2f-8790-e51fc736bb5b)
 
