@@ -100,7 +100,7 @@ CMD ["/start.sh"]
 EXPOSE 9997
 ```
 
-In the dockerfile, we can find the path to the flag. Before we go into exploitation, we need a little understanding about a heap structure first.
+In the dockerfile, we can find the path to the flag. Before we go into exploitation, we need a little understanding about a [heap structure](https://sourceware.org/glibc/wiki/MallocInternals) first.
 
 ![image](https://github.com/user-attachments/assets/f4f8bc26-3782-4c63-8e3e-ce7cd50f149a)
 
