@@ -80,3 +80,29 @@ p.interactive()
 ## Pwn/EtcPasswd Reader
 
 ### Initial Analysis
+
+![image](https://github.com/user-attachments/assets/83fc02d5-dc22-492d-87cc-06c3f6240998)
+
+Opening the binary in Ghidra, we can see that there is a buffer overflow with the gets() function inside the heap memory region due to the use of `malloc(0x40)`. Then, there is a second chunk allocated which contains the path `/etc/passwd`. So the goal is simple, bof enough until we reach the 2nd chunk and overwrite with the path to the flag. 
+
+```
+└─$ cat Dockerfile 
+FROM ubuntu:22.04
+ENV LC_CTYPE C.UTF-8
+ENV DEBIAN_FRONTEND=noninteractive
+
+<-- setup snippet -->
+
+# flag location: /flag/secretflag/flag
+
+CMD ["/start.sh"]
+
+EXPOSE 9997
+```
+
+In the dockerfile, we can find the path to the flag. Before we go into exploitation, we need a little understanding about a heap structure first.
+
+![image](https://github.com/user-attachments/assets/f4f8bc26-3782-4c63-8e3e-ce7cd50f149a)
+
+The image above shows the structure of a heap chunk when we allocate it. The payload area is the location where we can store data. Above the payload, there is some metadata about the heap chunk. For example, the size of the chunk and also some flags (AMP) needed for internal functions. We can verify this by taking a look in gdb.
+
