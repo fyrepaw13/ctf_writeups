@@ -81,7 +81,7 @@ p.interactive()
 
 ### Initial Analysis
 
-![image](https://github.com/user-attachments/assets/83fc02d5-dc22-492d-87cc-06c3f6240998)
+![image](https://github.com/user-attachments/assets/4f5cc698-593f-470a-96aa-8cf7132132a2)
 
 Opening the binary in Ghidra, we can see that there is a buffer overflow with the gets() function inside the heap memory region due to the use of `malloc(0x40)`. Then, there is a second chunk allocated which contains the path `/etc/passwd`. So the goal is simple, bof enough until we reach the 2nd chunk and overwrite with the path to the flag. 
 
