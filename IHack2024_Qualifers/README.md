@@ -1,3 +1,11 @@
+## Note
+
+Check for ASLR next time 
+
+```
+cat /proc/sys/kernel/randomize_va_space
+```
+
 ## Pwn/MorseCode Encoder
 
 ### Initial Analysis
