@@ -91,3 +91,5 @@ sla(b"b: ", "7")
 ![image](https://github.com/user-attachments/assets/428f0589-5f67-48c2-82e9-cbe7f4ac4124)
 
 We have a lot more flips now.
+
+### Overwrite the exit funcs to one gadget
