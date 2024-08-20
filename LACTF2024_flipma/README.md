@@ -139,3 +139,15 @@ sla(b"a: ", "9")
 sla(b"b: ", "9")
 ```
 
+![image](https://github.com/user-attachments/assets/8cc43b5c-f060-4dfe-8438-5317a29ab329)
+
+Now, we can control the pointers using
+
+```py
+def pointer_demangle(addr, key):
+  return ror(addr, 0x11) ^ key
+
+def pointer_mangle(addr, key):
+  return rol(addr ^ key, 0x11)
+```
+
