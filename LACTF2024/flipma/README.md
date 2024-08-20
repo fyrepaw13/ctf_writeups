@@ -4,20 +4,20 @@ I did not solve this challenge but I decided to look back at it because I wanted
 
 This challenge provides us with 4 bit flips, and our addresses are calculated at an offset from `_IO_2_1_stdin_`. The path to a solution, as with many other bit flip challenges, is to first get infinite bit flips for arbitrary write. The bit flip counter is stored in the base program’s bss, but PIE is enabled. Our goal should be to leak the base address before our 4th bit flip so that we can overwrite the counter. The flip being relative to stdin hints that we will need some form of leak-oriented FSOP. (https://enzo.run/posts/lactf2024/#flipma)
 
-First we will calculate the location of `_IO_2_1_stdin_`.
-
 ```
 stdout = 0xd20
 write_base = stdout + 0x20
 read_end = stdout + 0x10
 ```
 
-For this to work, we also need to make sure the _IO_CURRENTLY_PUTTING flag is set, and I initially thought we needed to use a bit flip on this, but just initializing stdout with an additional puts before the flips also works.
+First we will calculate the location of `_IO_2_1_stdin_`.
 
 ```
 sla(b"a: ", "9")
 sla(b"b: ", "9")
 ```
+
+For this to work, we also need to make sure the _IO_CURRENTLY_PUTTING flag is set, and I initially thought we needed to use a bit flip on this, but just initializing stdout with an additional puts before the flips also works.
 
 ![image](https://github.com/user-attachments/assets/5da04128-6251-4532-99b4-1b853b01c373)
 
