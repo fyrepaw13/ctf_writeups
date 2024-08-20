@@ -93,3 +93,11 @@ sla(b"b: ", "7")
 We have a lot more flips now.
 
 ### Overwrite the exit funcs to one gadget
+
+Lets find a suitable one gadget
+
+![image](https://github.com/user-attachments/assets/534b33e2-7fa9-4809-a3e5-dcda6d6f8454)
+
+![image](https://github.com/user-attachments/assets/4dd71422-ae29-4fae-9dd6-d0ae420e4c72)
+
+Set a breakpoint at `__libc_start_main` and move through each instruction until you reach the `call rdx`. We can see r12 and r15 is NULL which matches the condition for 0xe3afe
