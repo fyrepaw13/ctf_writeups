@@ -21,13 +21,11 @@ For this to work, we also need to make sure the _IO_CURRENTLY_PUTTING flag is se
 
 ![image](https://github.com/user-attachments/assets/5da04128-6251-4532-99b4-1b853b01c373)
 
-Next, we need to find a suitable location to leak the elf address.
+Next, we need to find a suitable location to leak the elf address. Using the search command in pwndbg, we can see there are 2 addresses in libc that contain the bytes of our elf section.
 
 ![image](https://github.com/user-attachments/assets/25c45ff4-9e6d-4f5b-8690-b90f8936ee96)
 
 Unbuffered file streams hold libc addresses to themselves in the buffer fields.
-
-Using the search command in pwndbg, we can see there are 2 addresses in libc that contain the bytes of our elf section.
 
 ![image](https://github.com/user-attachments/assets/5622ca66-3003-45b0-921e-33b93118e6c0)
 
