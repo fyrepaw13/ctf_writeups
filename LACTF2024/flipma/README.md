@@ -10,7 +10,7 @@ write_base = stdout + 0x20
 read_end = stdout + 0x10
 ```
 
-First we will calculate the location of `_IO_2_1_stdin_`.
+First we will calculate the location of `_IO_2_1_stdin_` and its fields.
 
 ```
 sla(b"a: ", "9")
