@@ -19,15 +19,19 @@ sla(b"a: ", "9")
 sla(b"b: ", "9")
 ```
 
+![image](https://github.com/user-attachments/assets/5da04128-6251-4532-99b4-1b853b01c373)
+
 Next, we need to find a suitable location to leak the elf address.
 
-![image](https://github.com/user-attachments/assets/5da04128-6251-4532-99b4-1b853b01c373)
+![image](https://github.com/user-attachments/assets/25c45ff4-9e6d-4f5b-8690-b90f8936ee96)
+
+Unbuffered file streams hold libc addresses to themselves in the buffer fields.
 
 Using the search command in pwndbg, we can see there are 2 addresses in libc that contain the bytes of our elf section.
 
 ![image](https://github.com/user-attachments/assets/5622ca66-3003-45b0-921e-33b93118e6c0)
 
-The idea is to flip a bit in `0x00007fd8a201a723` to become `0x00007fd8a2018723`, we can see that `libc.so.6       0x7fd8a2018f4a 0xa4200000562941ac` is located between the stdout->write_base and stdout->write_ptr
+The idea is to flip a bit in stdout->write_base `0x00007fd8a201a723` to become `0x00007fd8a2018723`. we can see that `libc.so.6       0x7fd8a2018f4a 0xa4200000562941ac` will be located between the stdout->write_base and stdout->write_ptr.
 
-Unbuffered file streams hold libc addresses to themselves in the buffer fields, but the file write function called from puts will treat the stream as buffered as long as there is a difference between _IO_write_base and _IO_write_ptr. This will cause the write function to print out memory from libc between those two addresses.
+but the file write function called from puts will treat the stream as buffered as long as there is a difference between _IO_write_base and _IO_write_ptr. This will cause the write function to print out memory from libc between those two addresses.
 
