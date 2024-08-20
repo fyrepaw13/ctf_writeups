@@ -2,5 +2,32 @@ I did not solve this challenge but I decided to look back at it because I wanted
 
 ## Challenge
 
-> This challenge provides us with 4 bit flips, and our addresses are calculated at an offset from `_IO_2_1_stdin_`. The path to a solution, as with many other bit flip challenges, is to first get infinite bit flips for arbitrary write. The bit flip counter is stored in the base program’s bss, but PIE is enabled. Our goal should be to leak the base address before our 4th bit flip so that we can overwrite the counter. The flip being relative to stdin hints that we will need some form of leak-oriented FSOP. Unbuffered file streams hold libc addresses to themselves in the buffer fields, but the file write function called from puts will treat the stream as buffered as long as there is a difference between _IO_write_base and _IO_write_ptr. This will cause the write function to print out memory from libc between those two addresses.
+This challenge provides us with 4 bit flips, and our addresses are calculated at an offset from `_IO_2_1_stdin_`. The path to a solution, as with many other bit flip challenges, is to first get infinite bit flips for arbitrary write. The bit flip counter is stored in the base program’s bss, but PIE is enabled. Our goal should be to leak the base address before our 4th bit flip so that we can overwrite the counter. The flip being relative to stdin hints that we will need some form of leak-oriented FSOP. (https://enzo.run/posts/lactf2024/#flipma)
+
+First we will calculate the location of `_IO_2_1_stdin_`.
+
+```
+stdout = 0xd20
+write_base = stdout + 0x20
+read_end = stdout + 0x10
+```
+
+For this to work, we also need to make sure the _IO_CURRENTLY_PUTTING flag is set, and I initially thought we needed to use a bit flip on this, but just initializing stdout with an additional puts before the flips also works.
+
+```
+sla(b"a: ", "9")
+sla(b"b: ", "9")
+```
+
+Next, we need to find a suitable location to leak the elf address.
+
+![image](https://github.com/user-attachments/assets/5da04128-6251-4532-99b4-1b853b01c373)
+
+Using the search command in pwndbg, we can see there are 2 addresses in libc that contain the bytes of our elf section.
+
+![image](https://github.com/user-attachments/assets/5622ca66-3003-45b0-921e-33b93118e6c0)
+
+The idea is to flip a bit in `0x00007fd8a201a723` to become `0x00007fd8a2018723`, we can see that `libc.so.6       0x7fd8a2018f4a 0xa4200000562941ac` is located between the stdout->write_base and stdout->write_ptr
+
+Unbuffered file streams hold libc addresses to themselves in the buffer fields, but the file write function called from puts will treat the stream as buffered as long as there is a difference between _IO_write_base and _IO_write_ptr. This will cause the write function to print out memory from libc between those two addresses.
 
