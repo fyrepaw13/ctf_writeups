@@ -29,7 +29,7 @@ Unbuffered file streams hold libc addresses to themselves in the buffer fields.
 
 ![image](https://github.com/user-attachments/assets/5622ca66-3003-45b0-921e-33b93118e6c0)
 
-The idea is to flip a bit in stdout->write_base `0x00007fd8a201a723` to become `0x00007fd8a2018723`. we can see that `libc.so.6       0x7fd8a2018f4a 0xa4200000562941ac` will be located between the stdout->write_base and stdout->write_ptr.
+The idea is to flip a bit in stdout->write_base `0x00007fd8a201a723` to become `0x00007fd8a2018723`. We can see that `0x7fd8a2018f4a 0xa4200000562941ac` will be located between the stdout->write_base and stdout->write_ptr.
 
 but the file write function called from puts will treat the stream as buffered as long as there is a difference between _IO_write_base and _IO_write_ptr. This will cause the write function to print out memory from libc between those two addresses.
 
