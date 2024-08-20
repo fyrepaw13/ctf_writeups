@@ -33,3 +33,9 @@ The idea is to flip a bit in stdout->write_base `0x00007fd8a201a723` to become `
 
 but the file write function called from puts will treat the stream as buffered as long as there is a difference between _IO_write_base and _IO_write_ptr. This will cause the write function to print out memory from libc between those two addresses.
 
+### Recap
+
+To force flush the buffer with its contents:
+
+- We need to set stdout->read_end = stdout->write_base
+- Ensure stdout->write_ptr = stdout->write_end
