@@ -1,8 +1,9 @@
-# LACTF2024
+![image](https://github.com/user-attachments/assets/484bcec5-0ac8-4155-a9b0-396d3eae19e5)# LACTF2024
 
 ## Table of Contents
 - [rev/easy-crackme](#reveasy-crackme)
 - [pwn/orcwars](#pwnorcwars)
+- [pwn/flag-service](#pwnflag-service)
 
 ## Rev/Easy-Crackme
 
@@ -43,3 +44,25 @@ if (len(my_simgr.found) > 0): # If a found state exists
 ![image](https://github.com/user-attachments/assets/dd8c6a01-e80e-4f25-ab30-54c1e2fad345)
 
 ## Pwn/Orcwars
+
+![image](https://github.com/user-attachments/assets/21264960-b2c2-461c-91eb-f2ebbe3cfa66)
+
+We are presented with a menu based game where we need to get more troops than the enemy
+
+![image](https://github.com/user-attachments/assets/f8699ce3-687a-4789-bd29-237626d15822)
+
+Our total troops must be at least 0x22a to get the flag.
+
+![image](https://github.com/user-attachments/assets/6b8eeebf-0b8d-492b-9987-9bd50448e129)
+
+The problem lies in the line `if ((int)local_34 < (int)(uVar5 * 100)) {`. The variable uVar5 is declared as an unsigned integer but is being casted to an integer. Hence, we can give a large number of mercenaries. After multiplying by 100, it should result in a negative number due to how integer works.
+
+![image](https://github.com/user-attachments/assets/8903b488-c489-436b-84a8-cd229f4b0bd8)
+
+Enter 1.1 billion
+
+![image](https://github.com/user-attachments/assets/67e7ef6a-00e7-436b-b3aa-f8d4b575d062)
+
+Fake flag because the remote server is not active anymore, so I just ran this locally.
+
+## Pwn/Flag-service
