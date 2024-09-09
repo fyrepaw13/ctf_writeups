@@ -64,3 +64,9 @@ Enter 1.1 billion
 Fake flag because the remote server is not active anymore, so I just ran this locally.
 
 ## Pwn/Flag-service
+
+![image](https://github.com/user-attachments/assets/f717f137-9dee-48e0-929d-40b98517fa8a)
+
+Another menu type challenge.
+
+![image](https://github.com/user-attachments/assets/64bc8cd7-3372-4db0-80e7-9db9f9711964)
