@@ -42,7 +42,7 @@ if (len(my_simgr.found) > 0): # If a found state exists
 
 ![image](https://github.com/user-attachments/assets/dd8c6a01-e80e-4f25-ab30-54c1e2fad345)
 
-## Pwn/Orcwars
+## :drop_of_blood: Pwn/Orcwars
 
 ![image](https://github.com/user-attachments/assets/21264960-b2c2-461c-91eb-f2ebbe3cfa66)
 
