@@ -69,4 +69,74 @@ Fake flag because the remote server is not active anymore, so I just ran this lo
 
 Another menu type challenge.
 
-![image](https://github.com/user-attachments/assets/64bc8cd7-3372-4db0-80e7-9db9f9711964)
+<details>
+<summary>Decompiled Code</summary>
+
+```c
+    switch(uVar3) {
+    case 0:
+      puts("not a valid input\n");
+      break;
+    case 1:
+      puts("enter your name :");
+      if (local_20 != (undefined8 *)0x0) {
+        free(local_20);
+      }
+      local_20 = (undefined8 *)malloc(0x10);
+      puVar4 = (undefined8 *)fgets((char *)local_20,0x10,stdin);
+      if (puVar4 == local_20) {
+        sVar5 = strlen((char *)local_20);
+        *(undefined *)((long)local_20 + (sVar5 - 1)) = 0;
+      }
+      else {
+        puts("error with name !");
+        *local_20 = 0x6e776f6e6b6e75;
+      }
+      break;
+    case 2:
+      puts("how many flags do you want ? \n(100$ per flag, max 9999 flags)");
+      nbflag = get_int_input(1,9999);
+      if (!deleted) {
+        free(order);
+      }
+      order = (uint *)malloc(8);
+      order[1] = nbflag;
+      *order = nbflag * 100;
+      printf("you want %d flags, which will cost %d$\n",(ulong)nbflag,(ulong)(nbflag * 100));
+      deleted = false;
+      fflush(stdin);
+      break;
+    case 3:
+      if (deleted) {
+        puts("you don\'t have any order to delete");
+      }
+      else {
+        order[1] = 0;
+        *order = 999;
+        free(order);
+        deleted = true;
+        puts("you deleted your order !");
+      }
+      break;
+    case 4:
+      if (((int)*order < 0) || ((int)money < (int)*order)) {
+        puts("you don\'t have enough money to buy those flags !");
+      }
+      else {
+        money = money - *order;
+        flags = order[1];
+        puts("you successfully bought the flag !");
+        printf("you now have %d flags\n",(ulong)flags);
+      }
+      if (0 < (int)flags) {
+        print_flag();
+        bVar2 = false;
+      }
+      break;
+    case 5:
+      puts("Bye !");
+      bVar2 = false;
+      break;
+```
+
+</details>
