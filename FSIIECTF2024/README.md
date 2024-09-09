@@ -1,9 +1,3 @@
-## Table of Contents
-- [rev/easy-crackme](#reveasy-crackme)
-- [pwn/orcwars](#pwn:drop_of_blood:orcwars)
-- [pwn/flag-service](#pwnflag-service)
-- [pwn/babyROP](#pwnbabyROP)
-
 ## Rev/Easy-Crackme
 
 ![image](https://github.com/user-attachments/assets/0bb9c9fc-0c5f-4733-82f8-96ef33e8e61a)
