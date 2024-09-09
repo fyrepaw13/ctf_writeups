@@ -2,6 +2,7 @@
 - [rev/easy-crackme](#reveasy-crackme)
 - [pwn/orcwars](#pwnorcwars)
 - [pwn/flag-service](#pwnflag-service)
+- [pwn/babyrop](#pwnbabyrop)
 
 ## Rev/Easy-Crackme
 
@@ -244,3 +245,7 @@ p.interactive()
 ```
 
 </details>
+
+![image](https://github.com/user-attachments/assets/93cbac59-c515-4e0d-99f8-18d7dc772f94)
+
+## Pwn/BabyROP
