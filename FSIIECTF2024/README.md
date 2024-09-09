@@ -11,7 +11,7 @@ Looking at the decompilation in Ghidra, we can just reassemble the flag from loc
 import angr
 import claripy
 
-FLAG_LEN = 42# Provide flag length
+FLAG_LEN = 42
 STDIN_FD = 0
 base_addr = 0x00100000
 
