@@ -1,5 +1,3 @@
-![image](https://github.com/user-attachments/assets/484bcec5-0ac8-4155-a9b0-396d3eae19e5)# LACTF2024
-
 ## Table of Contents
 - [rev/easy-crackme](#reveasy-crackme)
 - [pwn/orcwars](#pwnorcwars)
