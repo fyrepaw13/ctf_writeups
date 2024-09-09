@@ -4,6 +4,9 @@
 
 Looking at the decompilation in Ghidra, we can just reassemble the flag from local_78 to local_4f but I decided to use angr to solve it.
 
+<details>
+<summary>Angr script</summary>
+
 ```py
 import angr
 import claripy
@@ -33,6 +36,8 @@ if (len(my_simgr.found) > 0): # If a found state exists
 	for found in my_simgr.found:
 		print(found.posix.dumps(STDIN_FD)) # Print out the input
 ```
+
+</details>
 
 ![image](https://github.com/user-attachments/assets/dd8c6a01-e80e-4f25-ab30-54c1e2fad345)
 
