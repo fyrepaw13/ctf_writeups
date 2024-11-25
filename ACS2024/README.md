@@ -476,6 +476,9 @@ print(debug.getregistry().safe_method.popen("cat ./flag"):read("*a"))
 
 In the website given, we are allowed to upload a file. However, the challenge also provides us with YARA rules.
 
+<details>
+<summary>YARA rule</summary>
+
 ```
 import "pe"
 import "math"
@@ -511,3 +514,177 @@ rule acs_rule {
         hash.md5(0, filesize) == "33baf1c19ca30dac4617dbab5f375efd"
 }
 ```
+</details>
+
+<details>
+<summary>Exe Source Code</summary>
+
+```cpp
+#include <windows.h>
+#include <iostream>
+#include <vector>
+#include <cstdlib>
+#include <ctime>
+
+extern "C" __declspec(dllimport) void Function1();
+extern "C" __declspec(dllimport) void Function2();
+extern "C" __declspec(dllimport) void Function3();
+extern "C" __declspec(dllimport) void Function4();
+extern "C" __declspec(dllimport) void Function5();
+extern "C" __declspec(dllimport) void Function6();
+extern "C" __declspec(dllimport) void Function7();
+
+unsigned char randomData[1024 * 14] = {
+    0x85, 0xF7, 0x2C, 0x6F, 0x75, 0xC2, 0xF7, 0xD0,
+    …
+   (REDACTED)
+    …
+    0x20, 0x67, 0xE1, 0xE6, 0x62, 0xE9, 0x47, 0x12,
+};
+unsigned char randomData2[1024 * 14] = {
+    0x1D, 0x8C, 0xD5, 0x61, 0xE1, 0x89, 0x58, 0xD5,
+   …
+   (REDACTED)
+   …
+    0xF1, 0x0C, 0x00, 0x9F, 0x48, 0x19, 0x45, 0x88,
+};
+
+int main(){
+    std::vector<unsigned char> pattern = {
+        0x90, 0x90, 0x90, 0x90, 0x68, 0xFF, 0xFF, 0xFF, 0xFF, 0xC3
+    };
+
+    Function1();
+    Function2();
+    Function3();
+    Function4();
+    Function5();
+    Function6();
+    Function7();
+
+    return 0;
+};
+```
+
+This is the code which imports exactly 62 functions, with 3 of it being from acs.dll. Then, there are large arrays of random data to pass the entropy check.
+
+</details>
+<summary>Version.rc</summary>
+
+```c
+#include <windows.h>
+
+1 VERSIONINFO
+FILEVERSION 1,0,0,0
+PRODUCTVERSION 1,0,0,0
+FILEFLAGSMASK 0x3F
+FILEFLAGS 0x0
+FILEOS VOS__WINDOWS32
+FILETYPE VFT_APP
+FILESUBTYPE 0x0
+
+BEGIN
+    BLOCK "StringFileInfo"
+    BEGIN
+        BLOCK "040904E4" // Language and codepage (US English, Unicode)
+        BEGIN
+            VALUE "CompanyName", "acs"
+        END
+    END
+    BLOCK "VarFileInfo"
+    BEGIN
+        VALUE "Translation", 0x0409, 1252
+    END
+END
+```
+</details>
+
+Version.rc is to be compiled with the cpp file to match `pe.version_info["CompanyName"] == "acs"`
+
+<details>
+<summary>acs.cpp</summary>
+
+```cpp
+#include <iostream>
+#include <windows.h>
+
+extern "C" __declspec(dllexport) void Function1();
+extern "C" __declspec(dllexport) void Function2();
+extern "C" __declspec(dllexport) void Function3();
+
+void Function1() {
+    std::cout << "Function1 from acs.dll called!" << std::endl;
+}
+
+void Function2() {
+    std::cout << "Function2 from acs.dll called!" << std::endl;
+}
+
+void Function3() {
+    std::cout << "Function3 from acs.dll called!" << std::endl;
+}
+
+BOOL APIENTRY DllMain(HMODULE hModule, DWORD  ul_reason_for_call, LPVOID lpReserved) {
+    return TRUE;
+}
+```
+</details>
+
+<details>
+<summary>fake.cpp</summary>
+
+```cpp
+#include <iostream>
+#include <windows.h>
+
+extern "C" __declspec(dllexport) void Function4();
+extern "C" __declspec(dllexport) void Function5();
+extern "C" __declspec(dllexport) void Function6();
+extern "C" __declspec(dllexport) void Function7();
+
+void Function4() {
+    std::cout << "Function4 from acs.dll called!" << std::endl;
+}
+
+void Function5() {
+    std::cout << "Function5 from acs.dll called!" << std::endl;
+}
+
+void Function6() {
+    std::cout << "Function6 from acs.dll called!" << std::endl;
+}
+
+void Function7() {
+    std::cout << "Function7 from acs.dll called!" << std::endl;
+}
+
+BOOL APIENTRY DllMain(HMODULE hModule, DWORD  ul_reason_for_call, LPVOID lpReserved) {
+    return TRUE;
+}
+```
+</details>
+
+A fake dll to match the number of function imports
+
+The code above will pass most of the rules already, the hardest part was adding a section that matches the standard deviation range of 61.8 - 61.9. After a lot of trial and testing, we made a binary file with random data inside, manually modifying bytes until we achieve the desired standard deviation. We also have to match the condition ($acs = { 90 90 90 90 68 ?? ?? ?? ?? C3 }) where $acs must be located at an offset of +0x2f. We can run these commands to add the section to the exe.
+
+```sh
+objcopy --add-section .mysection=data.txt test.exe test.exe
+objcopy --add-section .mysection2=data.txt test.exe test.exe 
+objcopy --add-section .acs=acssection.bin test.exe test.exe
+```
+
+### Acssection.bin
+
+![image](https://github.com/user-attachments/assets/2610fc2c-1521-42c8-9b88-ed54b8fb6910)
+
+One last step before we match everything, when we compile with the version.res which will make the number of resources into 2. We will use CFF Explorer to just delete the resource
+
+![image](https://github.com/user-attachments/assets/f0318f82-030c-45e8-95e8-e78deab7065d)
+
+Then, just upload the file.
+
+![image](https://github.com/user-attachments/assets/83ce001f-827a-48e3-a46a-321e1353d5cc)
+
+> Flag : ACS{97d9bad8791993f95050bf4668f3e1351f39b21fafeb986822915ecc71d75f77}
+
