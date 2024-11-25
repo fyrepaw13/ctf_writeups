@@ -1,6 +1,7 @@
-# Audit
+## Table of Contents
+- [Audit/no-name minor](#Auditno-nameminor)
 
-## No-name minor
+# Audit/no-name minor
 
 This was a challenge similar to the one I created for Battle of Hackers 2024 so we solved it relatively fast. The challenge provides us with a binary that presents a menu that allows the user to borrow a loan, repay the loan, mining for money, buy a name and change name. 
 
@@ -236,3 +237,5 @@ io.sendline(payload)
 io.interactive()
 ```
 </details>
+
+# Rev/CS1338: Script Programming
