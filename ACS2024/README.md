@@ -3,6 +3,7 @@
 ## Table of Contents
 - [Audit/no-name minor](#Auditno-name-minor)
 - [Rev/CS1338: Script Programming](#RevCS1338-Script-Programming)
+- [Rev/Secure Chat](#RevSecure-Chat)
 
 # Audit/no-name minor
 
@@ -247,3 +248,14 @@ io.interactive()
 
 ![image](https://github.com/user-attachments/assets/88e3fbcd-01f1-4b0f-8fc2-0a4b20403711)
 
+Given the lua file, we know that it shows the source code of the instance and we are required to connect to the instance and send the correct string in order to get the flag. From the source code, we can see that it loads a file named library.
+
+![image](https://github.com/user-attachments/assets/19b83fbe-001b-4c42-ad58-e83641a02a46)
+
+We tried online decompiler for lua but failed, so ended up using an open source compiler that we learned from https://www.youtube.com/watch?v=nQR1raNkd2s.
+
+![image](https://github.com/user-attachments/assets/e6f88783-f3d0-4860-8d6a-152e4930b4f7)
+
+![image](https://github.com/user-attachments/assets/7aed4f77-0b0e-4b02-9a80-a7991e928c8c)
+
+# Rev/Secure Chat
