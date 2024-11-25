@@ -565,10 +565,11 @@ int main(){
     return 0;
 };
 ```
+</details>
 
 This is the code which imports exactly 62 functions, with 3 of it being from acs.dll. Then, there are large arrays of random data to pass the entropy check.
 
-</details>
+<details>
 <summary>Version.rc</summary>
 
 ```c
