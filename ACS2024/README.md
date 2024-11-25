@@ -2,7 +2,11 @@
 
 ## No-name minor
 
-This was a challenge similar to the one I created for Battle of Hackers 2024 so we solved it relatively fast. The challenge provides us with a binary that presents a menu that allows the user to borrow a loan, repay the loan, mining for money, buy a name and change name. The goal is to get a name. But 
+This was a challenge similar to the one I created for Battle of Hackers 2024 so we solved it relatively fast. The challenge provides us with a binary that presents a menu that allows the user to borrow a loan, repay the loan, mining for money, buy a name and change name. 
+
+![image](https://github.com/user-attachments/assets/90df0d94-6313-47c3-98f0-9376ca855de0)
+
+The goal is to get a name. But 
 
 - To buy a name, you need to have money.
 - To have money you cannot simply mine, cause it will take a lot of time.
@@ -58,12 +62,12 @@ This is the output
 
 Now, we just need to borrow money until 16777216, buy the name, and borrow loan of size $1 until we eventually are able to repay our loan.
 
-Buying the name
-
 ![image](https://github.com/user-attachments/assets/ad4d18bc-c5af-45d3-b630-8f4067bb0321)
 
-After borrowing $1
+Buying the name
 
 ![image](https://github.com/user-attachments/assets/318be9bc-d5d2-419d-a6cb-637534776cb4)
+
+After borrowing $1
 
 
