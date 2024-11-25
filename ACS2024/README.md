@@ -53,3 +53,7 @@ Heres a simple C program that demonstrates this
 ![image](https://github.com/user-attachments/assets/592a968a-5ee3-4b0d-a6b0-281de6eae7fa)
 
 This is the output
+
+### Exploiting the Program
+
+Now, we just need to borrow money until 16777216, buy the name, and borrow loan of size $1 until we eventually are able to repay our loan.
