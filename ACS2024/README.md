@@ -11,7 +11,7 @@ The challenge provides us with a binary that presents a menu that allows the use
 The vulnerability lies in the way the program keeps track of the user's loan.
 
 ```c
-# Miner struct
+// Miner struct
 struct MinerAccount {
 	float cash;
 	float debt_balance;
@@ -19,7 +19,7 @@ struct MinerAccount {
 	char name[0x20];
 };
 
-# Loan function
+// Loan function
 void loan(struct MinerAccount *account) {
 	uint32_t amount = 0;
     
