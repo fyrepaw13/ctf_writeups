@@ -48,4 +48,8 @@ The user's loan is defined as a float, which can be subjected to **floating poin
 
 ![image](https://github.com/user-attachments/assets/e75708b0-e383-4faa-bb98-5bbff0919289)
 
+Heres a simple C program that demonstrates this
+
 ![image](https://github.com/user-attachments/assets/592a968a-5ee3-4b0d-a6b0-281de6eae7fa)
+
+This is the output
