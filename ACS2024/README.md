@@ -5,6 +5,9 @@
 - [Rev/CS1338: Script Programming](#RevCS1338-Script-Programming)
 - [Rev/Secure Chat](#RevSecure-Chat)
 - [Web/Can You REDIRECT Me](#WebCan-You-REDIRECT-Me)
+- [Misc/Drone Hijacking](#MiscDrone-Hijacking)
+- [Misc/Lutella](#MiscLutella)
+- [Misc/Hi Alien](#MiscHi-Alien)
 
 # Audit/no-name minor
 
@@ -354,3 +357,157 @@ print("".join(flag))
 > Flag : ACS{D0_NoT_uS3_X0r_f0R_eNcRYp71on_4LG0r1ThM}
 
 # Web/Can You REDIRECT Me
+
+![image](https://github.com/user-attachments/assets/5c5cd6fb-d1d8-44c4-880f-b2b4f5cefee0)
+
+![image](https://github.com/user-attachments/assets/79e686e2-ed44-49b5-9554-ce8d516c11de)
+
+We were greeted with a page with almost nothing in it. Except for the provided url parameters:
+?url=Report_URL
+
+Let’s take a deeper look into the source code given and perform code analysis/audit.
+
+![image](https://github.com/user-attachments/assets/6295d402-ada0-4ca0-bacb-2baab98da91e)
+
+app.js and utils.js seem like the only relevant files for the challenge. Let’s dissect it real quick.
+
+The framework of the web app is very similar to the several other web challenges, of which are based on Express (NodeJS) and includes Puppeteer methods in its codebase.
+
+![image](https://github.com/user-attachments/assets/fbd57e53-da36-4283-a7b2-4eeb895b7931)
+
+There’s nothing really interesting in the utils.js file, except that now we’ve learned the Puppeteer session will be utilizing the goto method, which navigates the headless Chrome browser to the url fed by the user
+
+![image](https://github.com/user-attachments/assets/6faa526c-cf7e-46e3-80f5-a5c66f7417ba)
+
+Route Overview:
+
+The `/report` route expects a query parameter url. It checks if the URL's hostname is www.google.com. If the condition fails, it responds with I ONLY trust GOOGLE.
+
+Critical Checks:
+
+```
+Hostname Check: url.hostname != "www.google.com". This ensures the hostname is strictly www.google.com.
+Protocol Check: url.protocol != "http:" && url.protocol != "https:". Only http: or https: protocols are allowed.
+Bot Processing: The bot visits the provided URL. If the final URL's hostname isn't www.google.com, the flag is displayed.
+```
+
+URLs that don't have the URL protocol; http or https that are being passed onto the parameter will result in the output NOPE!
+
+The trick was to pass the hostname validation but somehow make the bot end up on a different hostname. Immediately, I remembered something about Google AMP (Accelerated Mobile Pages). If you hit a URL like this; https://google.com/amp/facebook.com. It passes the hostname check (www.google.com), but when visited, it redirects to facebook.com. Jackpot!
+
+Execution: Hit the /report endpoint with the payload /report?url=https://www.google.com/amp/facebook.com
+
+The server validated the hostname as www.google.com. The bot visited the URL, got redirected by Google AMP to facebook.com. The final check failed because of facebook.com != www.google.com, so the app returned the flag in the JavaScript alert.
+
+
+> Flag: ACS{It_i5_JU$7_tr1Cky_tRiCK}
+
+# Misc/Drone Hijacking
+
+![image](https://github.com/user-attachments/assets/0a3c7464-0943-4e4f-b079-6b6008a980f3)
+
+![image](https://github.com/user-attachments/assets/ad260165-e014-464a-a72d-ee540b3efad5)
+
+We are given a pcap file with RTP streams. Since it is a drone, we suspect that there might be video streaming. There’s a way to convert RTP to H264 manually in Wireshark according to this [forum](https://stackoverflow.com/questions/26164442/decoding-rtp-payload-as-h264-using-wireshark). H.264 is a video compression standard. The goal is to convert to H264 so that we can view the video. In Edit -> Preferences, set the payload type to 96
+
+![image](https://github.com/user-attachments/assets/5e9b78ee-501a-4e52-bce0-5175f42dfcef)
+
+Then, we will see that RTP stream has been converted to H264. We can install Wireshark plugin to extract H.264 stream from the RTP stream.
+
+Here’s the plugin that I found:
+https://github.com/volvet/h264extractor/blob/master/rtp_h264_extractor.lua
+
+Just put into the plugin folder where we install our Wireshark and the plugin will appear in Tools section.
+
+![image](https://github.com/user-attachments/assets/944885e1-a02b-4cca-a153-e1edd0f04bd0)
+
+We will get .264 file, and we can use ffmpeg to convert it to mp4.
+
+![image](https://github.com/user-attachments/assets/1d53d7e9-fcad-4aab-aa27-bb0c34918005)
+
+# Misc/Lutella
+
+![image](https://github.com/user-attachments/assets/2cfa7bd5-8b8a-4718-ad71-f444a44acb45)
+
+![image](https://github.com/user-attachments/assets/e99e3050-4170-4098-9ce4-855fff0e02e2)
+
+In this challenge, we were tasked with exploiting a Lua-based sandbox environment that had several restrictions, particularly on system calls and sensitive libraries. The goal was to find a way to escape the sandbox and retrieve the flag.
+
+Lua is a lightweight, high-level scripting language commonly embedded in applications to provide extensible scripting capabilities. It is known for its simplicity and flexibility, but in this challenge, we were working with a sandboxed Lua environment, meaning that our access to certain functions and libraries was restricted.
+
+Typically, a sandbox in Lua might restrict access to the following:
+
+System-level functions like os.execute(), os.popen(), and io.popen().
+The debug library, which can be used for introspection and manipulation of Lua's internal state.
+The ability to interact with the file system.
+
+In this environment, we were given limited access to the Lua language but could exploit certain exposed functionalities to break out of the sandbox.
+
+![image](https://github.com/user-attachments/assets/380b03dd-a648-42fe-9585-9f5a7434e068)
+
+The crux of the exploit involved using Lua's debug library and the internal debug.getregistry() function. The sandbox restricted access to system libraries like os and io, but we were able to bypass these restrictions by directly interacting with Lua's internal registry.
+
+We start by calling the debug.getregistry() function, which returns a global registry table that Lua uses to manage all objects internally. This registry is usually inaccessible in a sandboxed environment, but it wasn’t properly restricted here. By accessing the registry, we were able to locate internal functions and libraries that were not otherwise exposed.
+
+
+Within the registry, there was an exposed popen function, which allows us to execute system commands. This was a critical vulnerability because it provided a way to interact with the underlying operating system, despite the sandbox restrictions. Normally, Lua’s io.popen or os.popen would be restricted, but by leveraging the registry, we could access and use this function to run shell commands.
+
+Considering typical Lua sandbox escape techniques, I first tried to exploit the debug.getregistry() function. The idea was to look for unsafe methods or libraries available in the registry. 
+
+debug.getregistry().safe_method.popen("cat ./flag"):
+
+![image](https://github.com/user-attachments/assets/0135b2c9-1dc7-4a82-9314-e92cc60789b3)
+
+However, this command failed, as the prompt did not return the flag or any meaningful output.
+
+After further testing, I adjusted the approach and used the print function to display the result explicitly:
+
+```
+print(debug.getregistry().safe_method.popen("cat ./flag"):read("*a"))
+```
+
+![image](https://github.com/user-attachments/assets/aaad2671-cb34-48d7-9136-ba67e1ab0fbd)
+
+> Flag: ACS{Toast_and_chocolate_are_a_fantastic_combination}
+
+# Misc/Hi Alien
+
+![image](https://github.com/user-attachments/assets/4a5b571e-b968-41a0-b8d2-106faee97ab9)
+
+In the website given, we are allowed to upload a file. However, the challenge also provides us with YARA rules.
+
+```
+import "pe"
+import "math"
+import "hash"
+
+rule acs_rule {
+    meta:
+        description = "ACS"
+        author = "ACS"
+        date = "05/11/2024"
+        version = "1.0"
+
+    strings:
+        $acs = { 90 90 90 90 68 ?? ?? ?? ?? C3 }
+
+    condition:
+        uint16(0) == 0x5A4D and
+        math.entropy(0, filesize) > 6 and
+        pe.is_32bit() == 0 and
+        pe.version_info["CompanyName"] == "acs" and
+        pe.number_of_imported_functions == 62 and
+        pe.imports("acs.dll") == 3 and
+        pe.number_of_resources == 1 and
+        pe.number_of_sections == 23 and
+        $acs and
+        $acs in ((pe.sections[pe.section_index(".acs")].raw_data_offset) .. (pe.sections[pe.section_index(".acs")].raw_data_offset + pe.sections[pe.section_index(".acs")].raw_data_size)) and
+        for any section in pe.sections : (
+            section.name == ".acs" and
+            math.deviation(section.raw_data_offset, section.raw_data_size, math.MEAN_BYTES) > 61.8 and
+            math.deviation(section.raw_data_offset, section.raw_data_size, math.MEAN_BYTES) < 61.9 and
+            $acs at section.raw_data_offset + 0x2f
+        ) or
+        hash.md5(0, filesize) == "33baf1c19ca30dac4617dbab5f375efd"
+}
+```
