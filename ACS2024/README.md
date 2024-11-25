@@ -80,3 +80,74 @@ Buying the name
 After borrowing $1
 
 ### Buffer Overflow
+
+<details>
+<summary>Source Code</summary>
+
+```c
+#define MAX_BUF 0x200
+struct MinerAccount {
+	float cash;
+	float debt_balance;
+	int mining_attempts;
+	char name[0x20];
+};
+
+void change_name(struct MinerAccount *account) {
+	if (has_name_rights != 1) {
+    	printf("You do not have the right to change your name.\n");
+    	printf("Please purchase a name to gain the rights to rename your no-name.\n");
+    	return;
+	}
+	if(account->debt_balance != 0) {
+    	printf("You still have debts to repay.\n");
+    	printf("Pay off your debts to rename your no-name.\n");
+    	return;
+	}
+	printf("Enter new name.\n");
+	read(0, account->name, MAX_BUF);
+
+	printf("Name updated successfully.\n");
+}
+
+int main() {
+	initialize();
+	srand(time(NULL));
+	struct MinerAccount account = {0, 0, 0, "no-name"};
+	while(1) {
+    	int choice;
+    	printf("===========================\n");
+    	printf("Welcome to %s\n", account.name);
+    	printf("Current cash: $%.2f\n", account.cash);
+    	printf("Debt balance: $%.2f\n", account.debt_balance);
+    	printf("===========================\n");
+
+    	printf("1. Loan\n2. Repayment\n3. Mining\n4. Buy Name\n5. Change Name\n6. Exit\nChoose an action.\n");
+    	scanf("%d", &choice);
+    	switch(choice) {
+        	case 1:
+            	loan(&account);
+            	break;
+        	case 2:
+            	repayment(&account);
+            	break;
+        	case 3:
+            	mining(&account);
+            	break;
+        	case 4:
+            	buy_name(&account);
+            	break;
+        	case 5:
+            	change_name(&account);
+            	break;
+        	case 6:
+            	return 0;
+        	default:
+            	printf("Invalid choice\n");
+            	break;
+    	}
+	}
+	return 0;
+}
+```
+</details>
