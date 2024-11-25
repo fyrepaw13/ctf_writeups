@@ -1,3 +1,5 @@
+# ACS2024 Quals Writeup by Teh Tarik Cendol
+
 ## Table of Contents
 - [Audit/no-name minor](#Auditno-name-minor)
 - [Rev/CS1338: Script Programming](#RevCS1338-Script-Programming)
@@ -240,3 +242,8 @@ io.interactive()
 </details>
 
 # Rev/CS1338: Script Programming
+
+![image](https://github.com/user-attachments/assets/0d5f6ee7-5b36-48fa-8de2-a42a96f3dcb6)
+
+![image](https://github.com/user-attachments/assets/88e3fbcd-01f1-4b0f-8fc2-0a4b20403711)
+
