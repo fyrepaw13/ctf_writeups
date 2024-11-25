@@ -1,6 +1,6 @@
 ## Table of Contents
 - [Audit/no-name minor](#Auditno-name-minor)
-- [Rev/CS1338: Script Programming](RevCS1338:-Script-Programming)
+- [Rev/CS1338: Script Programming](#RevCS1338:-Script-Programming)
 
 # Audit/no-name minor
 
