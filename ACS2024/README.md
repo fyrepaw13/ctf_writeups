@@ -14,6 +14,9 @@ The goal is to get a name. But
 
 The vulnerability lies in the way the program keeps track of the user's loan.
 
+<details>
+<summary>Source Code</summary>
+
 ```c
 // Miner struct
 struct MinerAccount {
@@ -45,6 +48,7 @@ void loan(struct MinerAccount *account) {
 	printf("Debt balance: $%.2f\n", account->debt_balance);
 }
 ```
+</details>
 
 The user's loan is defined as a float, which can be subjected to **floating point inaccuracy.**  A float is 32 bit and it has 1 bit for sign, 23 bit for mantissa and 8 bit for exponent. For integers, the inaccuracy starts at 2^24 (16,777,216). In other words, all integers can be represented as floats up to 2^24 but not beyond that. Specifically, in the range of 2^24 to 2^25, float does not support odd numbers, only even numbers.
 
@@ -70,4 +74,4 @@ Buying the name
 
 After borrowing $1
 
-
+### Buffer Overflow
