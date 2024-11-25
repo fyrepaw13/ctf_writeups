@@ -4,6 +4,7 @@
 - [Audit/no-name minor](#Auditno-name-minor)
 - [Rev/CS1338: Script Programming](#RevCS1338-Script-Programming)
 - [Rev/Secure Chat](#RevSecure-Chat)
+- [Web/Can You REDIRECT Me](#WebCan-You-REDIRECT-Me)
 
 # Audit/no-name minor
 
@@ -352,3 +353,4 @@ print("".join(flag))
 
 > Flag : ACS{D0_NoT_uS3_X0r_f0R_eNcRYp71on_4LG0r1ThM}
 
+# Web/Can You REDIRECT Me
