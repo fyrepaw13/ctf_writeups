@@ -52,6 +52,9 @@ void loan(struct MinerAccount *account) {
 
 The user's loan is defined as a float, which can be subjected to **floating point inaccuracy.**  A float is 32 bit and it has 1 bit for sign, 23 bit for mantissa and 8 bit for exponent. For integers, the inaccuracy starts at 2^24 (16,777,216). In other words, all integers can be represented as floats up to 2^24 but not beyond that. Specifically, in the range of 2^24 to 2^25, float does not support odd numbers, only even numbers.
 
+<details>
+<summary>Proof of Concept</summary>
+
 ### Proof of Concept
 
 ![image](https://github.com/user-attachments/assets/e75708b0-e383-4faa-bb98-5bbff0919289)
@@ -61,6 +64,8 @@ Heres a simple C program that demonstrates this
 ![image](https://github.com/user-attachments/assets/592a968a-5ee3-4b0d-a6b0-281de6eae7fa)
 
 This is the output
+
+</details>
 
 ### Exploiting the Program
 
