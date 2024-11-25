@@ -195,7 +195,6 @@ io.sendline(b'16777216')
 #io.recvuntil(b'Choose an action.\n')
 io.sendline(b'4')
 
-
 for i in range(1337):
 #	io.recvuntil(b'Choose an action.\n')
 	io.sendline(b'1')
@@ -246,6 +245,10 @@ io.sendline(payload)
 io.interactive()
 ```
 </details>
+
+![image](https://github.com/user-attachments/assets/f1ef7400-45c9-4280-af4d-2e9b33d9747e)
+
+@Capang proud of this :D
 
 # Rev/CS1338: Script Programming
 
