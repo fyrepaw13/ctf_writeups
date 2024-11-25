@@ -2,7 +2,7 @@
 
 ## No-name minor
 
-The challenge provides us with a binary that presents a menu that allows the user to borrow a loan, repay the loan, mining for money, buy a name and change name. The goal is to get a name. But 
+This was a challenge similar to the one I created for Battle of Hackers 2024 so we solved it relatively fast. The challenge provides us with a binary that presents a menu that allows the user to borrow a loan, repay the loan, mining for money, buy a name and change name. The goal is to get a name. But 
 
 - To buy a name, you need to have money.
 - To have money you cannot simply mine, cause it will take a lot of time.
@@ -42,4 +42,4 @@ void loan(struct MinerAccount *account) {
 }
 ```
 
-The user's loan is defined as a float, which can be subjected to **floating point inaccuracy.**
+The user's loan is defined as a float, which can be subjected to **floating point inaccuracy.**  A float is 32 bit and it has 1 bit for sign, 23 bit for mantissa and 8 bit for exponent. For integers, the inaccuracy starts at 2^24. In other words, all integers can be represented as floats up to 2^24 but not beyond that. Specifically, in the range of 2^24 to 2^25, float does not support odd numbers, only even numbers.
