@@ -1,5 +1,5 @@
 ## Table of Contents
-- [Audit/no-name minor](#Auditno-nameminor)
+- [Audit/no-name minor](#Auditno-name-minor)
 
 # Audit/no-name minor
 
