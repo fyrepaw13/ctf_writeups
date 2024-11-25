@@ -151,3 +151,14 @@ int main() {
 }
 ```
 </details>
+
+The name in MinerAccount object was assigned to only 0x20 size, but in change_name function we can change up until 0x200. With the help of the printf() in main, we are able to leak the stack canary and libc address after overwriting enough bytes using read(). Putting it all together, we get 
+
+1) We loan 16777216 money
+2) Then we buy name so our money no 16777216 - 1337
+3) Then if we loan 1 dollar each time, our cash increase, but debt stays the same. So we loan 1 dollar for 1337 times
+4) Then can repay all debt
+5) Now start the leaking process through name
+6) Leak canary
+7) Leak libc_start_main address
+8) Proceed will rop chain to system
