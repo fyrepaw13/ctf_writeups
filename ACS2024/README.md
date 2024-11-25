@@ -57,3 +57,6 @@ This is the output
 ### Exploiting the Program
 
 Now, we just need to borrow money until 16777216, buy the name, and borrow loan of size $1 until we eventually are able to repay our loan.
+
+![image](https://github.com/user-attachments/assets/157b67e6-6f70-4e55-a738-f78d44b58b2e)
+
