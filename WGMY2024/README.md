@@ -195,7 +195,7 @@ payload += p64(stdout + 0x1000)
 
 ![image](https://github.com/user-attachments/assets/52214079-50ad-4ed1-92da-b9907e244482)
 
-Now, the buffer for our write is located at `_IO_2_1_stdout_`. The next thing to do would be to overwrite stdout with our payload.
+Now, the buffer for our write is located at `_IO_2_1_stdout_`. The next thing to do would be to overwrite stdout with our fake file struct.
 
 ```py
 fake = FileStructure(0)
