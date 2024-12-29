@@ -9,6 +9,15 @@
 
 ## Pwn/Screenwriter
 
+<details>
+<summary>Decompiled Code</summary>
+
+```
+
+```
+
+</details>
+
 ## Game/World 1
 
 ## Game/World 2
