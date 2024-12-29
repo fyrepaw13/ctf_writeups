@@ -295,9 +295,27 @@ p.interactive()
 
 </details>
 
+### Side Note
+
+There are multiple ways to solve this challenge, potentially overwriting the return address of read() or overwriting the exit functions handler with a one gadget. I tried both but it didnt work for me so I guess its a skill issue. Though, I was very satisfied with this because its my first time solving a FSOP challenge after reading writeups about it.
+
 ## Game/World 1
 
+When saving the game, we get a RMMZSave file which we can edit using this [Save Edit](https://www.saveeditonline.com/)
+
+![image](https://github.com/user-attachments/assets/dcad718c-1093-455f-9ccf-97b2d4f7ccff)
+
+Then, just play the game and one shot the bosses to get all the flag. Flag 1, 2 and 3 is obtainable by killing the boss. Flag 4 can be obtained by killing the lava world boss and walking back out. The flag is written on the floor. The final flag is obtained by unlocking the chest and entering the password "wgmy". Hints about the password is given as "23 7 13 25".
+
 ## Game/World 2
+
+Open the apk in APKLab and look for interesting things. One thing I found was the Enemies.json
+
+![image](https://github.com/user-attachments/assets/1129c465-dc52-4921-a649-cdac2b4fed99)
+
+`"params":[600,0,20,20,20,20,20,20]`
+
+I assumed the params are the stats of the monster and just modified the biggest number (assuming to be HP) to 1. Then, recompile the APK and sign it. Then install the game in BlueStacks and play through the game to get all the flags. Flags are obtained in the same way as World 1
 
 ## Rev/Stones
 
