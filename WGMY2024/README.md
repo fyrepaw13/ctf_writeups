@@ -13,6 +13,8 @@ Challenge Description : Use our software to craft your next blockbuster hit!
 
 Challenge Summary : This challenge involves overwriting the FILE struct to gain arbitrary read and write
 
+Author : Ren
+
 <details>
 <summary>Source Code</summary>
 
