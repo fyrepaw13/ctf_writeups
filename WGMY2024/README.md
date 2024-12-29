@@ -6,6 +6,10 @@
 - [game/world 2](#gameworld-2)
 - [rev/stones](#revstones)
 - [rev/sudoku](#revsudoku)
+- [crypto/rick's algorithm](#cryptorick's-algorithm)
+- [crypto/hohoho3](#cryptohohoho3)
+- [crypto/hohoho3 continue](#cryptohohoho3-continue)
+- [forensic/i cant manipulate people]
 
 ## Pwn/Screenwriter
 
