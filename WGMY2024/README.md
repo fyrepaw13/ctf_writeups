@@ -147,6 +147,8 @@ struct _IO_FILE
 
 </details>
 
+--------
+
 The FILE Struct contains many fields which manage buffering.
 
 ![image](https://github.com/user-attachments/assets/03c4a9dd-ef7a-4ef6-a6df-42a5cf45204f)
