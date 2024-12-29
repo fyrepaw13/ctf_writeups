@@ -9,9 +9,7 @@
 
 ## Pwn/Screenwriter
 
-### Challenge Description
-
-Use our software to craft your next blockbuster hit!
+Challenge Description : Use our software to craft your next blockbuster hit!
 
 <details>
 <summary>Source Code</summary>
