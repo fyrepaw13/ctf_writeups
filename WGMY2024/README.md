@@ -147,6 +147,8 @@ struct _IO_FILE
 
 </details>
 
+The FILE Struct contains many fields which manage buffering
+
 ## Game/World 1
 
 ## Game/World 2
