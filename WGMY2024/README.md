@@ -147,7 +147,15 @@ struct _IO_FILE
 
 </details>
 
-The FILE Struct contains many fields which manage buffering
+The FILE Struct contains many fields which manage buffering.
+
+![image](https://github.com/user-attachments/assets/03c4a9dd-ef7a-4ef6-a6df-42a5cf45204f)
+
+After using option 3, we can see that the struct is now populated with values.
+
+![image](https://github.com/user-attachments/assets/d9123403-d0ad-450e-b409-864d182c755a)
+
+The contents of the bee script is read into 0x405690 which corresponds to the values in the struct above.
 
 ## Game/World 1
 
