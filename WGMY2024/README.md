@@ -9,7 +9,10 @@
 - [crypto/rick's algorithm](#cryptorick's-algorithm)
 - [crypto/hohoho3](#cryptohohoho3)
 - [crypto/hohoho3 continue](#cryptohohoho3-continue)
-- [forensic/i cant manipulate people]
+- [forensic/i cant manipulate people](#forensici-cant-manipulate-people)
+- [forensic/oh man](#forensicoh-man)
+- [forensic/unwanted meow](#forensicunwanted-meow)
+- [misc/the dcm meta](#miscthe-dcm-meta)
 
 ## Pwn/Screenwriter
 
@@ -461,3 +464,241 @@ print(flag)
 ![image](https://github.com/user-attachments/assets/605fcf21-3a9d-47d3-93f4-cc8227503e88)
 
 Our output is `w.my2ba914045b56c5e58..1b4a593b05746` but since we know the flag format and we know that the hash is hex values, we can just fix the flag to `wgmy{2ba914045b56c5e58ff1b4a593b05746}`
+
+## Crypto/Rick's Algorithm
+
+To bypass c % pow(flag,e,n) we need to add n onto the ciphertext and then to bypass flag % pow(c,d,n), we can just multiply 2**e to the ciphertext. Now send it to the server which it will decrypt for us and we will get the flag in the form of 2m so divide 2 and we will get the flag.
+
+<details>
+<summary>Solve Script</summary>
+
+```py
+from pwn import
+from Crypto.Util.number import *
+import gmpy2
+
+io = remote('43.216.11.94',32804)
+io.recvuntil(b"Enter option: ")
+io.sendline(b'3')
+io.recvuntil(b'flag: ')
+enc = int(io.recvline().decode().strip('\n'))
+e = 0x557
+
+numbers_bytes = [b'\x03',b'\x04',b'\x05',b'\x06']
+numbers = [3,4,5,6]
+ciphers = []
+diffs = []
+for i in range(4):
+    io.recvuntil(b'Enter option: ')
+    io.sendline(b'1')
+    io.recvuntil(b'Enter message to encrypt: ')
+    io.sendline(numbers_bytes[i])
+    io.recvuntil(b'Encrypted message: ')
+    cipher = int(io.recvline().strip().decode())
+    ciphers.append(cipher)
+    diffs.append(pow(numbers[i], e) - cipher)
+
+common_factor = None
+for diff in diffs:
+    if common_factor is None:
+        common_factor = diff
+    else:
+        common_factor = gmpy2.gcd(common_factor, diff)
+print(common_factor) 
+print(ciphers[0] == pow(3, e, common_factor))
+io.recvuntil(b"Enter option: ")
+io.sendline(b'2')
+newenc = (pow(2,e)*enc)+common_factor
+io.recvuntil(b"Enter ciphertext to decrypt: ")
+io.sendline(str(newenc).encode())
+io.recvuntil(b'Decrypted message: ')
+flag = int(io.recvline().strip().decode())
+print(long_to_bytes(flag//2))
+```
+
+</details>
+
+## Crypto/Hohoho3
+
+Basically it checks the lsb of our (crc xor name) and only xor with m if it's 1 
+that means if we send 127
+we will be skipping 7 iterations of this xor operation
+only the right shift is applied every iteration which we can still calculate
+at the 8th iteration we let it xor with m cuz now we know our token and crc value
+meaning m can be calculated by xoring the other two values
+
+<details>
+<summary>Solve Script</summary>
+
+```py
+from pwn import *
+import itertools
+from binascii import unhexlify, hexlify
+
+io = remote("43.216.11.94", 33891)
+
+io.recvuntil(b"Enter option: ")
+io.sendline(b'1')
+io.recvuntil(b"Enter your name: ")
+#io.interactive()
+io.sendline(chr(127).encode())
+io.recvuntil(b"Use this token to login: ")
+token = io.recvline().decode().strip('\n') 
+toget = int.from_bytes(bytes.fromhex(token)) ^ ((1 << 128) - 1)
+m = ((1 << 120) - 1) ^ toget
+print(m)
+
+def generateToken(name):
+    data = name.encode(errors="surrogateescape")
+    crc = (1 << 128) - 1
+    for b in data:
+        crc ^= b
+        for _ in range(8):
+            crc = (crc >> 1) ^ (m & -(crc & 1))
+    
+    return hex(crc ^ ((1 << 128) - 1))[2:]
+
+forge = generateToken("Santa Claus")
+io.recvuntil(b"Enter option: ")
+io.sendline(b'2')
+io.recvuntil(b"Enter your name: ")
+io.sendline(b'Santa Claus')
+io.recvuntil(b"Enter your token: ")
+io.sendline(forge.encode())
+io.recvuntil(b"Enter option: ")
+io.sendline(b'4')
+print(io.recvline().decode().strip('\n'))
+print(io.recvline().decode().strip('\n'))
+```
+
+</details>
+
+## Crypto/Hohoho3 Continue
+
+We can reuse the script from Hohoho3 to solve this too.
+
+<details>
+<summary>Solve Script</summary>
+
+```py
+from pwn import *
+import itertools
+from binascii import unhexlify, hexlify
+
+io = remote("43.216.11.94", 33891)
+
+io.recvuntil(b"Enter option: ")
+io.sendline(b'1')
+io.recvuntil(b"Enter your name: ")
+#io.interactive()
+io.sendline(chr(127).encode())
+io.recvuntil(b"Use this token to login: ")
+token = io.recvline().decode().strip('\n') 
+toget = int.from_bytes(bytes.fromhex(token)) ^ ((1 << 128) - 1)
+m = ((1 << 120) - 1) ^ toget
+print(m)
+
+def generateToken(name):
+    data = name.encode(errors="surrogateescape")
+    crc = (1 << 128) - 1
+    for b in data:
+        crc ^= b
+        for _ in range(8):
+            crc = (crc >> 1) ^ (m & -(crc & 1))
+    
+    return hex(crc ^ ((1 << 128) - 1))[2:]
+
+forge = generateToken("Santa Claus")
+io.recvuntil(b"Enter option: ")
+io.sendline(b'2')
+io.recvuntil(b"Enter your name: ")
+io.sendline(b'Santa Claus')
+io.recvuntil(b"Enter your token: ")
+io.sendline(forge.encode())
+io.recvuntil(b"Enter option: ")
+io.sendline(b'4')
+print(io.recvline().decode().strip('\n'))
+print(io.recvline().decode().strip('\n'))
+```
+
+</details>
+
+## Forensic/I Cant Manipulate People
+
+The challenge is about network analysis and they provided us with a pcap file called traffic.pcap. Therefore, I used Wireshark to further analyze the traffic, and I observed that there are multiple ICMP protocol that are being sent as ping requests, so I checked out the packets. 
+
+![image](https://github.com/user-attachments/assets/472fa7aa-53ac-4f39-8d61-bdfeab4edacc)
+
+Inside the first ICMP packet, I was able to observe that the last byte of the data was a readable ASCII character, so I continued to look at the other ICMP packets based on their sequence
+
+![image](https://github.com/user-attachments/assets/7ee6f2b4-2dbe-44e4-8f4b-1f89f1f5e96f)
+
+It seems that the last byte of the ICMP packets are printing an ASCII character that resembles the flag format of the competition which is `WGMY{flag}`
+
+![image](https://github.com/user-attachments/assets/fa491769-59f9-4cec-8e25-00af606db4b9)
+
+Retrieving the characters manually could be time consuming and there is a high possibility of human errors so I create a simple python script that will retrieve every single last byte of the ICMP packets and convert them into readable ASCII characters using scapy. By running the script, we will be able to retrieve the entire flag.
+
+![image](https://github.com/user-attachments/assets/777316f9-dd5c-4b9d-a42e-7971eabb7eaa)
+
+> Flag: WGMY{1e3b71d57e466ab71b43c2641a4b34f4}
+
+## Forensic/Oh Man
+
+The challenge is related to network analysis and it provided us with a file called wgmy-ohman.pcapng. My initial analysis was to use Wireshark to inspect the packets and analyze the traffic. We can see that there are multiple encrypted SMB3 packets, and it requires us to decrypt to further investigate the traffic. Fortunately, we can simply decrypt the packets using NTLM hashes.
+
+![image](https://github.com/user-attachments/assets/5a1d600b-5c6e-4559-94c7-8cb460104da8)
+
+We can gather the NTLM hashes information from the SMB2 protocol starting from the challenge packet.
+
+![image](https://github.com/user-attachments/assets/f42c8e93-c59c-46f2-8962-c497d5e1367a)
+
+After successfully gathering all the relevant NTLM hashes, it should look something like this
+
+![image](https://github.com/user-attachments/assets/994d8fc3-c44e-4a5b-9a6b-9205badfa1ee)
+
+Now we need to convert them into hashcat readable format and then use hashcat to brute force the NTLMSSP password using the rockyou.txt wordlist.
+
+![image](https://github.com/user-attachments/assets/7c217785-a758-4e33-8249-e32bc46a09f1)
+
+After a moment, hashcat should be able to find the correct password which is password<3. Then, we can decrypt the SMB3 encrypted traffic by using Wireshark and placing the password into the NTLMSSP protocol. The SMB3 traffic should be decrypted now, and we can use the export objects function to obtain the files used in the traffic. One of the files called ‘RxHmEj’ contains information on how to restore the corrupted log.
+
+![image](https://github.com/user-attachments/assets/f9d9a3a5-5b66-4144-b9a3-351994497523)
+
+I simply created a python script that will restore the minidump by correcting its signature. After that, I used pypykatz minidump feature to extract the credentials from the log.
+
+![image](https://github.com/user-attachments/assets/345db230-2571-42df-979d-4314207d9b72)
+
+After dumping all the extracted credentials, we can retrieve the flag from one of the passwords
+
+![image](https://github.com/user-attachments/assets/7f844dbb-1615-4286-8d39-edbf88037aee)
+
+> Flag: wgmy{fbba48bee397414246f864fe4d2925e4}
+
+## Forensic/Unwanted Meow
+
+The challenge provided us with a corrupted JPEG file called flag.shredded and my initial analysis was to check the headers of the image to ensure that the image is in correct signature format.
+
+![image](https://github.com/user-attachments/assets/0f1e1350-9265-4cf5-b205-8c410ce6b2c8)
+
+By using xxd, it seems the hex headers of the image are in correct signature format, so I further analyze the image. Eventually, I found out that there are weird ‘meow’ strings contained inside the data of the image.
+
+![image](https://github.com/user-attachments/assets/a3ae8afa-6a68-4710-afb7-a8c3e042cbad)
+
+By removing all the ‘meow’ strings from the image data using hex editor, the correct image will be formed, and we will be able to retrieve the flag.
+
+![image](https://github.com/user-attachments/assets/e1a434c4-f520-4725-9b59-26de5859b272)
+
+> Flag: WGMY{4a4be40c96ac6314e91d93f38043a634}
+
+## Misc/The DCM Meta
+
+The challenge provided us with a Dicom file and upon opening the file with a text editor, we can see that there are random ASCII characters along with the flag format WGMY contain inside the file
+
+![image](https://github.com/user-attachments/assets/2bad2de9-286d-4aa0-ab89-e92cbd9a2cd5)
+
+The challenge description provided us with some sort of indices that could represents the index of each ASCII characters inside the Dicom file. Therefore, I create a simple python script to rearrange their orders based on the provided indices. By running the python script, we will obtain the flag.
+
+![image](https://github.com/user-attachments/assets/06496e26-fd07-4b96-9a08-f343c78e8b18)
+
+> Flag: WGMY{51fadeb6cc77504db336850d53623177}
