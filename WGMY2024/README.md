@@ -319,4 +319,127 @@ I assumed the params are the stats of the monster and just modified the biggest 
 
 ## Rev/Stones
 
+Running strings on the file shows that its a python executable
+
+![image](https://github.com/user-attachments/assets/bc14c56f-1ed3-41df-8970-2fe9d6a13a7b)
+
+Use [pyinstxtractor](https://github.com/extremecoders-re/pyinstxtractor) on the exe.
+
+<details>
+<summary>Extracted</summary>
+
+```py
+
+```py
+# Source Generated with Decompyle++
+# File: CHAL-stones.pyc (Python 3.10)
+
+import requests
+from datetime import datetime
+from urllib.request import urlopen
+from datetime import datetime
+server_url = 'http://3.142.133.106:8000'
+current_time = urlopen('http://just-the-time.appspot.com/')
+current_time = current_time.read().strip()
+current_time = current_time.decode('utf-8')
+current_date = current_time.split(' ')[0]
+local_date = datetime.now().strftime('%Y-%m-%d')
+# print(current_date)
+# print(local_date)
+if current_date == local_date:
+    print("We're gonna need a really big brain; bigger than his?")
+first_flag = 'WGMY{1d2993'
+user_date = current_date
+params = {
+    'first_flag': first_flag,
+    'date': user_date }
+response = requests.get(server_url, params, **('params',))
+if response.status_code == 200:
+    print(response.json()['flag'])
+#     return None
+# None(response.json()['error'])
+```
+
+</details>
+
+From the challenge description, theres a `/flag` endpoint on the server so just navigate to `http://3.142.133.106:8000/flag` and the server will respond with a YouTube video link. Send a get request to `http://3.142.133.106:8000` with the date set to the upload date of the YouTube video will give us the flag.
+
 ## Rev/Sudoku
+
+Once again, another python executable. Just use pyinstxtractor and pycdc to get the original code back
+
+<details>
+<summary>Extracted</summary>
+
+```py
+
+```py
+# Source Generated with Decompyle++
+# File: sudoku.pyc (Python 3.11)
+
+import random
+alphabet = 'abcdelmnopqrstuvwxyz1234567890.'
+plaintext = '0 t.e1 qu.c.2 brown3 .ox4 .umps5 over6 t.e7 lazy8 do.9, w.my{[REDACTED]}'
+
+def makeKey(alphabet):
+    alphabet = list(alphabet)
+    random.shuffle(alphabet)
+    return ''.join(alphabet)
+
+key = makeKey(alphabet)
+
+def encrypt(plaintext, key, alphabet):
+    pass
+# WARNING: Decompyle incomplete
+
+enc = encrypt(plaintext, key, alphabet)
+```
+
+</details>
+
+### Solve
+
+<details>
+<summary>Solve Script</summary>
+
+```py
+
+```py
+plaintext = '0 t.e1 qu.c.2 brown3 .ox4 .umps5 over6 t.e7 lazy8 do.9, w.my'
+anotherrr = 'z v7o1 an7570 9d.tl3 7.4b 7n2pws .qodx v7oc ye68u m.7r, t728'
+
+# Function to create a mapping from plaintext to anotherr
+def create_mapping(plaintext, anotherr):
+    # Initialize an empty dictionary to store the character mapping
+    char_mapping = {}
+
+    # Iterate over the characters in both strings
+    for p_char, a_char in zip(plaintext, anotherr):
+        if p_char != ' ' and a_char != ' ':  # Ignore spaces
+            char_mapping[p_char] = a_char
+    
+    return char_mapping
+
+# Create the mapping
+mapping = create_mapping(plaintext, anotherrr)
+encrypted_message = "t728{09er1bzbs9sx5sosu7719besr39zscbx}"
+
+# Print the character mapping
+# print("Character Mapping:")
+i = 0
+flag = ""
+        
+print(mapping)
+
+for i in range(len(encrypted_message)):
+    for p_char, a_char in mapping.items():
+        if a_char == encrypted_message[i]:
+            flag += p_char
+print(flag)
+```
+
+</details>
+
+![image](https://github.com/user-attachments/assets/605fcf21-3a9d-47d3-93f4-cc8227503e88)
+
+Our output is `w.my2ba914045b56c5e58..1b4a593b05746` but since we know the flag format and we know that the hash is hex values, we can just fix the flag to `wgmy{2ba914045b56c5e58ff1b4a593b05746}`
