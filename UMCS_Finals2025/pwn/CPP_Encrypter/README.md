@@ -83,7 +83,6 @@ def encrypt(num, method, msg):
   sla(b": ", str(method))
 
 # p = exe.process()
-# p = remote("localhost", 10002)
 p = remote(host,port)
 
 win = 0x401976
