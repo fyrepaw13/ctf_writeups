@@ -98,4 +98,132 @@ p.interactive()
 
 ![image](https://github.com/user-attachments/assets/108a3920-876b-4681-b223-317915787f21)
 
-> UMCS{AW3S0ME_3NCRYPT0R_S0LLV33_73bb3661}
+> Flag : UMCS{AW3S0ME_3NCRYPT0R_S0LLV33_73bb3661}
+
+## SLA
+
+```py
+#!/usr/bin/env python3
+"""
+Service-health checker for the “Encrypt Messages” huge-array allocation bug.
+
+Return codes:
+0 – vulnerable / unpatched
+1 – patched
+2 – service down
+"""
+import socket
+import sys
+import time
+
+# Status codes
+UNPATCHED, PATCHED, DOWN = 0, 1, 2
+
+# ======= helpers ============================================================
+
+def recv_until(sock, marker: bytes, timeout=8.0) -> bool:
+    """Receive until *marker* appears or timeout expires. Returns True on success."""
+    sock.settimeout(timeout)
+    data = b""
+    try:
+        while marker not in data:
+            chunk = sock.recv(1024)
+            if not chunk:
+                return False          # connection closed
+            data += chunk
+        print(data)
+        return True
+    except (socket.timeout, ConnectionResetError):
+        return False
+
+def send_line(sock, line: str):
+    sock.sendall(line.encode() + b"\n")
+
+# ======= main check =========================================================
+
+def run_check(host: str, port: int) -> int:
+    try:
+        s = socket.create_connection((host, port), timeout=3)
+    except (socket.timeout, ConnectionRefusedError):
+        return DOWN
+
+    try:
+        # Step 1: Create account
+        if not recv_until(s, b"Enter choice: "):
+            print(82)
+            return DOWN
+        send_line(s, "1")  # menu → Create Account
+        print("creating account")
+
+        if not recv_until(s, b"Enter username: "):
+            print(222)
+            return DOWN
+        send_line(s, "t")  # 1-byte username keeps parsing simple
+
+        if not recv_until(s, b"Enter password: "):
+            return DOWN
+        send_line(s, "t")
+        print("created account")
+
+        # Wait for success banner and next menu
+        if not recv_until(s, b"Enter choice: "):
+            return DOWN
+        print("yes no?")
+
+        # Step 2: Log in
+        send_line(s, "2")
+        if not recv_until(s, b"Username: "):
+            return DOWN
+        send_line(s, "t")
+        if not recv_until(s, b"Password: "):
+            return DOWN
+        send_line(s, "t")
+        if not recv_until(s, b"Login successful!\n"):
+            return DOWN
+
+        # print("login success")
+        if not recv_until(s, b"Enter choice: "):
+            return DOWN
+
+        print("yes no?")
+
+        # Step 3: Trigger the bug in “Encrypt Messages”
+        send_line(s, "5")
+        if not recv_until(s, b"How many messages to hash? "):
+            return DOWN
+        huge = "500000000000000000000"
+        send_line(s, huge)
+        print("sent big")
+
+        # If the service is patched, it should send an error message **and**
+        # return to the menu within a short window.
+        patched_response = recv_until(s, b"Enter choice:", timeout=2)
+    
+        if patched_response:
+            return PATCHED  # still alive → patched
+        else:
+            # Connection may already be dead; double-check with a tiny pause
+            time.sleep(0.5)
+            try:
+                s.send(b"PING\n")
+            except Exception:
+                return UNPATCHED        # crashed → vulnerable
+            return UNPATCHED            # still up but ignored us → treat as vuln
+    finally:
+        try:
+            s.close()
+        except Exception:
+            pass
+
+# ======= entry-point ========================================================
+
+if __name__ == "__main__":
+    host = sys.argv[1] if len(sys.argv) > 1 else "localhost"
+    port = int(sys.argv[2]) if len(sys.argv) > 2 else 10102
+
+    status = run_check(host, port)
+    print(status)
+    sys.exit(status)
+```
+
+The SLA script checks if you still are able to send a big number as the array length. There are probably many ways to patch this so I'll just leave it up to you guys to find out :D
