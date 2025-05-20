@@ -226,4 +226,4 @@ if __name__ == "__main__":
     sys.exit(status)
 ```
 
-The SLA script checks if you still are able to send a big number as the array length. There are probably many ways to patch this so I'll just leave it up to you guys to find out :D
+The SLA script checks if you still are able to send a big number as the array length. There are probably many ways to patch this such as removing the call, adding jump instructions or modifying jump conditions so I'll just leave it up to you guys to find out :D
