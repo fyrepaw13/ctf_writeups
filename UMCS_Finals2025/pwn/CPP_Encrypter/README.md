@@ -24,7 +24,12 @@ After going through the things that we can overwrite, this function looked the m
 
 After doing abit of going through every single function in the program, you will eventually stumble upon this interesting function. Next step is how to terminate the program in a different way? 
 
-![image](https://github.com/user-attachments/assets/1ee643bd-6c97-4e19-a2d6-55ae51a84b10)
+```c
+    if (0xfffffffffffffff < uVar2) {
+      uVar3 = __cxa_throw_bad_array_new_length();
+      goto LAB_004020f1;
+    }
+```
 
 In the encrypt message function, if you give too many messages to encrypt, it will trigger bad array length. So the goal is simple
 
